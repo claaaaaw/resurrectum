@@ -318,7 +318,7 @@ def _backend_name(backend: StorageBackend) -> str:
         return "local_dir"
     if isinstance(backend, S3Backend):
         return "s3"
-    return "s3"
+    raise CapsuleError(f"Unknown backend type: {type(backend).__name__}")
 
 
 def _write_manifest(backend: StorageBackend, capsule_id: str, manifest: dict[str, Any]) -> None:

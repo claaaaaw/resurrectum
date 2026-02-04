@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+from functools import cached_property
 from pathlib import Path, PurePosixPath
 from typing import Iterable
 
@@ -24,8 +25,12 @@ class DetectorRule:
     patterns: tuple[str, ...]
     flags: int = re.MULTILINE
 
-    def compile(self) -> list[re.Pattern[str]]:
+    @cached_property
+    def compiled_patterns(self) -> list[re.Pattern[str]]:
         return [re.compile(pattern, self.flags) for pattern in self.patterns]
+
+    def compile(self) -> list[re.Pattern[str]]:
+        return self.compiled_patterns
 
 
 @dataclass(frozen=True)
@@ -234,9 +239,12 @@ class RedactionPolicy:
 
 
 def iter_workspace_files(workspace_root: Path) -> Iterable[Path]:
+    resolved_root = workspace_root.resolve()
     for path in sorted(workspace_root.rglob("*")):
-        if path.is_file():
-            yield path
+        if path.is_file() and not path.is_symlink():
+            resolved = path.resolve()
+            if resolved.is_relative_to(resolved_root):
+                yield path
 
 
 def matches_any(rel_path: str, patterns: Iterable[str]) -> bool:
@@ -274,7 +282,9 @@ def classify_hit_classes(hit_classes: set[str]) -> str:
         return "forbidden"
     if "sensitive" in hit_classes:
         return "sensitive"
-    return "private"
+    if "private" in hit_classes:
+        return "private"
+    return "public"
 
 
 def find_rule_locations(text: str, rule: DetectorRule) -> list[dict[str, int]]:

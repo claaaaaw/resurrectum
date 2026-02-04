@@ -43,11 +43,16 @@ class LocalDirBackend:
         return rel.as_posix()
 
     def get_blob(self, ref: str) -> bytes:
-        path = self.root / ref
+        path = (self.root / ref).resolve()
+        if not path.is_relative_to(self.root.resolve()):
+            raise ValueError(f"Path traversal detected: {ref}")
         return path.read_bytes()
 
     def has_blob(self, ref: str) -> bool:
-        return (self.root / ref).is_file()
+        path = (self.root / ref).resolve()
+        if not path.is_relative_to(self.root.resolve()):
+            return False
+        return path.is_file()
 
     def put_document(self, capsule_id: str, path: str, data: bytes) -> None:
         target = self.capsule_root(capsule_id) / path
@@ -55,7 +60,10 @@ class LocalDirBackend:
         self._atomic_write(target, data)
 
     def get_document(self, capsule_id: str, path: str) -> bytes:
-        return (self.capsule_root(capsule_id) / path).read_bytes()
+        target = (self.capsule_root(capsule_id) / path).resolve()
+        if not target.is_relative_to(self.root.resolve()):
+            raise ValueError(f"Path traversal detected: {path}")
+        return target.read_bytes()
 
     def list(self, capsule_id: str, prefix: str) -> list[str]:
         base = self.capsule_root(capsule_id)
@@ -70,11 +78,15 @@ class LocalDirBackend:
 
     def _atomic_write(self, path: Path, data: bytes) -> None:
         tmp = path.with_suffix(path.suffix + ".tmp")
-        with tmp.open("wb") as handle:
-            handle.write(data)
-            handle.flush()
-            os.fsync(handle.fileno())
-        tmp.replace(path)
+        try:
+            with tmp.open("wb") as handle:
+                handle.write(data)
+                handle.flush()
+                os.fsync(handle.fileno())
+            tmp.replace(path)
+        except Exception:
+            tmp.unlink(missing_ok=True)
+            raise
 
 
 @dataclass(frozen=True)
@@ -121,13 +133,23 @@ class S3Backend:
     def get_blob(self, ref: str) -> bytes:
         client = self._client()
         response = client.get_object(Bucket=self.bucket, Key=ref)
-        return response["Body"].read()
+        with response["Body"] as body:
+            return body.read()
 
     def has_blob(self, ref: str) -> bool:
+        try:
+            from botocore.exceptions import ClientError
+        except ImportError:
+            ClientError = Exception  # type: ignore[misc]
         client = self._client()
         try:
             client.head_object(Bucket=self.bucket, Key=ref)
             return True
+        except ClientError as e:
+            error_code = e.response.get("Error", {}).get("Code", "") if hasattr(e, "response") else ""
+            if error_code in ("404", "NoSuchKey"):
+                return False
+            raise
         except Exception:  # noqa: BLE001
             return False
 
@@ -141,7 +163,8 @@ class S3Backend:
         key = self._key(capsule_id, path)
         client = self._client()
         response = client.get_object(Bucket=self.bucket, Key=key)
-        return response["Body"].read()
+        with response["Body"] as body:
+            return body.read()
 
     def list(self, capsule_id: str, prefix: str) -> list[str]:
         client = self._client()
@@ -160,3 +183,4 @@ class S3Backend:
                 return
             except Exception:  # noqa: BLE001
                 time.sleep(self.read_after_write_delay)
+        raise RuntimeError(f"Read-after-write check failed for key: {key}")

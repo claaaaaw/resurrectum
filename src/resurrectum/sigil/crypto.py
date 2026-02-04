@@ -7,6 +7,7 @@ from typing import Any
 
 import rfc8785
 from argon2.low_level import Type, hash_secret_raw
+from cryptography.exceptions import InvalidSignature, InvalidTag
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM, XChaCha20Poly1305
@@ -40,6 +41,10 @@ class Argon2Params:
 
 
 def derive_master_key(passphrase: str, salt: bytes, params: Argon2Params) -> bytes:
+    if not passphrase:
+        raise CryptoError("Passphrase cannot be empty.")
+    if len(salt) < 16:
+        raise CryptoError("Salt must be at least 16 bytes.")
     if params.hash_len != 32:
         raise CryptoError("Argon2id hash_len must be 32 bytes for v1.")
     return hash_secret_raw(
@@ -103,7 +108,10 @@ def decrypt_payload(
         cipher = AESGCM(data_key)
     else:
         raise CryptoError(f"Unsupported AEAD: {aead}")
-    return cipher.decrypt(nonce, ciphertext, associated_data)
+    try:
+        return cipher.decrypt(nonce, ciphertext, associated_data)
+    except InvalidTag as exc:
+        raise CryptoError("Decryption failed: invalid tag or corrupted data") from exc
 
 
 def blob_id_for_ciphertext(ciphertext: bytes) -> str:
@@ -117,7 +125,10 @@ def canonicalize_manifest_for_signing(manifest: dict[str, Any]) -> bytes:
 
 
 def sign_manifest(manifest: dict[str, Any], private_key_pem: bytes) -> dict[str, str]:
-    private_key = serialization.load_pem_private_key(private_key_pem, password=None)
+    try:
+        private_key = serialization.load_pem_private_key(private_key_pem, password=None)
+    except (ValueError, TypeError) as exc:
+        raise SignatureError("Invalid PEM format for signing key.") from exc
     if not isinstance(private_key, ed25519.Ed25519PrivateKey):
         raise SignatureError("Signing key must be an Ed25519 private key.")
     public_key = private_key.public_key().public_bytes(
@@ -159,5 +170,5 @@ def verify_manifest_signature(
     sig_bytes = base64url_decode(sig_b64)
     try:
         public_key.verify(sig_bytes, canonicalize_manifest_for_signing(manifest))
-    except Exception as exc:  # noqa: BLE001
+    except InvalidSignature as exc:
         raise SignatureError("Invalid manifest signature.") from exc
