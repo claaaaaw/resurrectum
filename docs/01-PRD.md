@@ -1,4 +1,4 @@
-# Memory Capsule (Soul Immortality) — PRD v1 (OpenClaw-only)
+# Resurrectum (Soul Immortality) — PRD v1 (OpenClaw-only)
 
 **Audience:** AI engineers
 
@@ -31,7 +31,7 @@ Result: fragile backups, inconsistent restores, and high risk when syncing to an
 5) Provide a **redaction framework** with machine-readable reporting.
 
 ### 3.2 Secondary Goals
-- Enable incremental snapshots (dedupe by content addressing).
+- Enable **intra-export dedupe** (within a single export run). Multi-snapshot capsules and cross-snapshot dedupe are deferred to v1.1+.
 - Support “hot storage + cold backup” patterns (e.g., S3/MinIO hot; IPFS encrypted cold later).
 
 ## 4. Non-Goals (v1)
@@ -46,8 +46,8 @@ Result: fragile backups, inconsistent restores, and high risk when syncing to an
 - **Agent Runtime** (OpenClaw): consumes restored files with zero or minimal changes.
 
 ## 6. Core User Stories
-1) As an engineer, I can run `openclaw capsule export` to produce a capsule artifact from a workspace.
-2) As an engineer, I can run `openclaw capsule import` to reconstruct the workspace.
+1) As an engineer, I can run `openclaw summon export` to produce a capsule artifact from a workspace.
+2) As an engineer, I can run `openclaw summon import` to reconstruct the workspace.
 3) As an ops user, I can validate a capsule without decrypting payload (when encryption metadata allows) or with keys.
 4) As a security reviewer, I can audit what was included/excluded and why (redaction report).
 
@@ -65,11 +65,13 @@ Result: fragile backups, inconsistent restores, and high risk when syncing to an
 ### 7.2 Manifest (Machine Layer)
 - Export produces a **manifest** that lists:
   - `capsule_id` (UUIDv7)
+  - `schema_version` (semver)
   - capsule format version
   - source workspace info (non-sensitive)
   - included artifacts (path, type, size, hash, encryption ref)
   - redaction decisions and detectors that ran
   - provenance: created_at, creator tool version
+  - crypto parameters (AEAD + Argon2id params + HKDF info)
   - **required signature over the manifest** (v1), including:
     - Ed25519 public key embedded in the manifest
     - RFC 8785 JCS bytes-to-sign definition
@@ -86,6 +88,8 @@ See `03-SCHEMAS.md` (normative) and `04-CLI-SPEC.md` (normative).
 - **Key source (v1): passphrase → Argon2id → Master Key (MK).**
   - MK is used to derive per-blob keys via HKDF.
   - Key rotation is out-of-scope for v1; a new capsule can use new keys.
+  - Argon2id parameters + salt MUST be recorded in the manifest.
+  - HKDF `info` is fixed to `capsule:blob` (UTF-8) for v1 interoperability.
 
 ### 7.4 Import Semantics
 - Import must be able to:
@@ -141,6 +145,8 @@ Per artifact, exporter may choose:
 - **include_plaintext** (rare; should require explicit allow)
 - **include_redacted** (content rewritten; store both hash of original? v1: store only redacted content)
 
+Note: `include_plaintext` means **unredacted bytes**; payloads are still encrypted by default in v1.
+
 ### 8.5 Redaction Report
 Export MUST emit `redaction.report.json` with:
 - policy version
@@ -164,6 +170,7 @@ Export MUST emit `redaction.report.json` with:
 - **Policy**: ensure `.env` and detected private keys are excluded by default.
 - **Tamper**: modify payload object → validation fails.
 - **Determinism (v1)**: import restores byte-identical artifacts and `plaintext_hash` verifies. Re-export is NOT required to produce the same ciphertext/blob IDs; `created_at` may differ.
+- **Schema completeness**: manifest includes `schema_version` and Argon2id parameters; redaction report includes decisions + findings summary.
 
 ### 10.2 Success Metrics (qualitative)
 - Engineers can implement CLI + library with only this spec.

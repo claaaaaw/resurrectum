@@ -1,8 +1,8 @@
-# Memory Capsule — Migration & Compatibility (OpenClaw-only)
+# Resurrectum — Migration & Compatibility (OpenClaw-only)
 
 **Audience:** AI engineers
 
-**v1 scope:** Compatibility and migration rules for OpenClaw-only Memory Capsule v1 and v1.x evolution.
+**v1 scope:** Compatibility and migration rules for OpenClaw-only Resurrectum v1 and v1.x evolution.
 
 ## 0. Goals
 - Maintain compatibility across OpenClaw workspace evolution.
@@ -21,6 +21,7 @@
 
 ## 2. Capsule versioning strategy
 - `spec_version`: `v1`, `v1.1`, ...
+- `schema_version`: semver string for each JSON document
 - `capsule_id`: UUIDv7 (stable identifier for one exported snapshot)
 - v1.x: backward-compatible additions only.
 - v2: breaking changes.
@@ -30,6 +31,9 @@ Importer behavior:
   - `validate` fails with a clear message
   - `import` fails by default
   - optionally `--best-effort` can attempt restoring known fields only (future)
+- If unknown fields are present:
+  - unknown non-`x_` fields MUST be rejected as schema-invalid
+  - extension fields MUST be prefixed with `x_` and MUST be ignored
 
 ## 3. Workspace migration
 - Import should restore files into a target workspace without overwriting by default.

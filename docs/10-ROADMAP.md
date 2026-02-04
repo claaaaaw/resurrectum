@@ -1,8 +1,8 @@
-# Memory Capsule — Roadmap
+# Resurrectum — Roadmap
 
 **Audience:** AI engineers / maintainers
 
-**v1 scope:** Planning document for OpenClaw-only Memory Capsule spec and tooling.
+**v1 scope:** Planning document for OpenClaw-only Resurrectum spec and tooling.
 
 ## Related docs
 - Canonical entry point: `README.md`
@@ -13,6 +13,7 @@
 ## v1 (OpenClaw-only) — current focus
 Deliver a complete Machine Layer + tooling spec suitable for implementation:
 - Manifest + redaction report schemas
+- Restore report schema (optional output, but schema defined)
 - CLI spec (export/import/validate/dry-run)
 - Backends (local dir + S3/MinIO)
 - Signing + E2EE defaults

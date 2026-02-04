@@ -1,8 +1,8 @@
-# Memory Capsule — Open Questions (track in one place)
+# Resurrectum — Open Questions (track in one place)
 
 **Audience:** AI engineers / maintainers
 
-**v1 scope:** Track unresolved design questions for OpenClaw-only Memory Capsule beyond the locked v1 decisions.
+**v1 scope:** Track unresolved design questions for OpenClaw-only Resurrectum beyond the locked v1 decisions.
 
 ## Related docs
 - Canonical entry point: `README.md`
@@ -23,7 +23,7 @@
 ## Remaining questions
 1) **Path privacy:** do we ever encrypt paths/filenames to reduce metadata leakage?
 2) **Lineage model:** do we ship `parents[]` in v1.1, and do we guarantee linear history first?
-3) **Plaintext allowance:** do we allow any plaintext artifacts at all, or keep v1 strictly encrypted-only?
+3) **Unencrypted allowance:** do we ever allow unencrypted artifacts in a future version, or keep capsules strictly encrypted-only?
 4) **Deterministic export mode (future):** if we want stable ciphertext/nonces/blob_ids for the same inputs, do we add an explicit deterministic mode in v1.1+ or v2?
 5) **PII detection:** do we add stronger PII detectors (names/addresses) and how to manage false positives?
 6) **Key recovery UX:** recovery phrase / key escrow options (must avoid violating security boundary).

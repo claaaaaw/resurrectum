@@ -1,15 +1,11 @@
-# Memory Capsule — Security & Threat Model v1 (OpenClaw-only)
+# Resurrectum — Security & Threat Model v1 (OpenClaw-only)
 
 **Audience:** AI engineers / security reviewers
 
-**v1 scope:** Security properties and threat model for OpenClaw-only Memory Capsule v1.
+**v1 scope:** Security properties and threat model for OpenClaw-only Resurrectum v1.
 
 ## 0. Executive summary
-Memory Capsule v1 assumes **untrusted remote storage** and provides security via:
-- **E2EE** encryption (AEAD) for all exported payloads by default
-- **Ciphertext-addressed blobs** (`blob_id = sha256(ciphertext_bytes)`) to avoid plaintext correlation
-- **Manifest signing (required v1)** to ensure provenance and prevent silent substitution
-- **Strict redaction policy** to prevent exporting secrets/PII by default
+Resurrectum v1 assumes **untrusted remote storage** and provides security via:
 
 ## Related docs
 - Architecture overview: `02-ARCHITECTURE.md`
@@ -17,6 +13,10 @@ Memory Capsule v1 assumes **untrusted remote storage** and provides security via
 - Redaction boundary (normative): `07-REDACTION-POLICY.md`
 - CLI behavior (normative): `04-CLI-SPEC.md`
 - Conformance tests: `08-CONFORMANCE-TESTS.md`
+- **E2EE** encryption (AEAD) for all exported payloads by default
+- **Ciphertext-addressed blobs** (`blob_id = sha256(ciphertext_bytes)`) to avoid plaintext correlation
+- **Manifest signing (required v1)** to ensure provenance and prevent silent substitution
+- **Strict redaction policy** to prevent exporting secrets/PII by default
 
 ## 1. Assets to protect
 - Agent continuity state (OpenClaw files): memory/persona/ops/project summaries
@@ -42,8 +42,10 @@ Assume attacker cannot:
 
 ## 4. Security properties (v1 requirements)
 ### 4.1 Confidentiality
-- All artifact payloads MUST be encrypted (AEAD) unless explicitly allowed plaintext (rare, discouraged).
+- All artifact payloads MUST be encrypted (AEAD); `include_plaintext` refers to unredacted bytes, not unencrypted storage.
 - Manifest and redaction report MUST NOT contain secret values.
+  - Recording Argon2id parameters + salt is required and does not violate confidentiality.
+ - AEAD nonces MUST be unique per blob and generated with a CSPRNG.
 
 ### 4.2 Integrity
 - Every blob MUST be verified by ciphertext hash (`blob_id`).
@@ -61,11 +63,28 @@ Assume attacker cannot:
 ## 5. Key management (v1)
 ### 5.1 Key source
 - **Passphrase → Argon2id → Master Key (MK)** (v1 required)
+  - Argon2id parameters and salt are stored in the manifest to ensure interoperability.
+
+### 5.1.1 Recommended Argon2id parameters (v1)
+Baseline defaults (tune up if hardware allows):
+- `mem_kib`: `65536` (64 MiB)
+- `iterations`: `3`
+- `parallelism`: `1`
+- `hash_len`: `32`
+
+Implementations MUST record the actual parameters and salt used in the manifest.
 
 ### 5.2 Signing key source / operational model (v1)
 - Export requires access to an Ed25519 **signing private key** provided out-of-band (e.g., `--signing-key file:PATH`).
 - The capsule embeds the corresponding public key and its fingerprint in the manifest.
 - Verification requires the operator/runtime to pin/trust the expected signer identity (fingerprint or key file). This prevents “anyone can mint a capsule” attacks.
+
+### 5.2.1 Signing key generation (recommended)
+Use Ed25519 keys in PKCS8 PEM format:
+- `openssl genpkey -algorithm Ed25519 -out capsule-signing.key`
+- `openssl pkey -in capsule-signing.key -pubout -out capsule-signing.pub`
+
+Fingerprint = `sha256(raw_public_key_bytes)` (lowercase hex). The exporter SHOULD compute this from the public key file to avoid user error.
 
 ### 5.2 Recommendations
 - Encourage long passphrases; enforce minimum length.
@@ -80,6 +99,7 @@ Assume attacker cannot:
 The redaction policy defines what becomes **canonical revived state**.
 - If excluded/redacted, it is not part of the revived agent.
 - This is intentional to avoid "reviving secrets" into environments where they should not exist.
+Note: `include_plaintext` means unredacted bytes; encryption is still required in v1.
 
 ## 7. Common attacks & mitigations
 - **Storage reads** → mitigated by E2EE
@@ -99,3 +119,4 @@ The redaction policy defines what becomes **canonical revived state**.
 - [ ] strict redaction policy enforced by default
 - [ ] redaction report contains no secret substrings
 - [ ] conformance tests cover tamper, wrong passphrase, forbidden findings
+- [ ] manifest records Argon2id parameters + salt and fixed HKDF info

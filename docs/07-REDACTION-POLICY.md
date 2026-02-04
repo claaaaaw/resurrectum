@@ -1,11 +1,11 @@
-# Memory Capsule — Redaction Policy v1 (OpenClaw-only, strict)
+# Resurrectum — Redaction Policy v1 (OpenClaw-only, strict)
 
 **Audience:** AI engineers
 
-**v1 scope:** Normative redaction boundary and default policy for OpenClaw-only Memory Capsule v1.
+**v1 scope:** Normative redaction boundary and default policy for OpenClaw-only Resurrectum v1.
 
 ## 0. Purpose
-Define how Memory Capsule decides what to include/exclude/redact when exporting an OpenClaw workspace.
+Define how Resurrectum decides what to include/exclude/redact when exporting an OpenClaw workspace.
 
 ## Related docs
 - Requirements: `01-PRD.md`
@@ -62,6 +62,11 @@ Detector output:
 
 **Never include matched strings.**
 
+### 5.1 Detector config hash (v1, normative)
+Each detector entry in `redaction.report.json` MUST include `config_hash` computed as:
+`sha256( JCS(detector_config) )` (lowercase hex, UTF-8 bytes).
+If a detector has no config, use the JCS of an empty object `{}`.
+
 ## 6. Decisions & actions
 Per artifact, policy chooses one:
 - `exclude`
@@ -73,12 +78,20 @@ v1 default behavior:
 - Any Forbidden match → `exclude` and (in strict mode) block export.
 - Sensitive match → `exclude` unless explicit opt-in.
 
+Note: `include_plaintext` means **unredacted bytes**; payloads are still encrypted by default in v1.
+
 ## 7. Reports (machine-readable)
 Export MUST emit `redaction.report.json` with:
 - policy version
+- schema version + capsule_id
 - detectors run + config hash
 - per-file decisions + reasons
+  - `decision`: `exclude | include_encrypted | include_redacted | include_plaintext`
+  - `class`: `public | private | sensitive | forbidden`
 - findings summary
+
+Coverage rule (v1):
+- `decisions` MUST include **every candidate file** considered by policy, including excluded files.
 
 Safety rule:
 - findings include **types/rule IDs/locations only**.
@@ -86,7 +99,7 @@ Safety rule:
 ## 8. CLI guardrails
 - `--dry-run`: produce only redaction report
 - `--strict` (default): any Forbidden finding blocks export
-- `--i-know-what-im-doing`: required to include Forbidden class
+- `--i-know-what-im-doing`: required to include Forbidden class (must be paired with `--no-strict`)
 
 ## 9. Open questions (future)
 - Optional path encryption to reduce metadata leakage

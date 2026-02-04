@@ -1,8 +1,8 @@
-# Memory Capsule — Conformance Tests v1 (OpenClaw-only)
+# Resurrectum — Conformance Tests v1 (OpenClaw-only)
 
 **Audience:** AI engineers
 
-**v1 scope:** Normative conformance test requirements for OpenClaw-only Memory Capsule v1.
+**v1 scope:** Normative conformance test requirements for OpenClaw-only Resurrectum v1.
 
 ## 0. Goal
 Define the compatibility bar so any implementation can be verified as:
@@ -34,6 +34,8 @@ Fixtures live in `conformance/fixtures/`:
 - Restored files match byte-for-byte for allowlisted artifacts
 - `capsule.manifest.json` is valid
 - `redaction.report.json` exists and is valid
+- manifest includes `schema_version`, `crypto.kdf_params`, and `crypto.hkdf_info`
+- payload bytes restored are identical to original (no compression/transforms in v1)
 
 ### 2.2 Policy strict mode (fail closed)
 Fixture contains:
@@ -48,9 +50,10 @@ Fixture contains:
 
 ### 2.3 Dry run (normative v1)
 **Assert**
-- `openclaw capsule export --dry-run` produces only `redaction.report.json`
+- `openclaw summon export --dry-run` produces only `redaction.report.json`
 - no blobs are written
 - no manifest is written
+- report is written under `capsules/<capsule_id>/redaction.report.json` and includes `capsule_id`
 
 ### 2.4 Tamper detection
 After export:
@@ -82,6 +85,18 @@ Validate/import with a signer that is not trusted.
 - `validate` fails with code `4` (signature/trust failure)
 - `import` fails before any decrypt/restore
 
+### 2.8 Manifest consistency
+**Assert**
+- `artifacts[].path` values are unique
+- `blobs[].blob_id` values are unique
+- every `artifacts[].blob_id` exists in `blobs[]`
+- `signature.signer_fingerprint` matches `sha256(public_key_bytes)`
+
+### 2.9 Redaction report coverage & summary consistency
+**Assert**
+- `decisions` contains all candidate files (including excluded ones)
+- `findings_summary` totals match the actual `findings` and `decisions`
+
 ## 3. Definition: “OpenClaw-compatible” (v1)
 An implementation is compatible if:
 - It can export/import OpenClaw workspace files listed in PRD without changing their formats.
@@ -89,5 +104,5 @@ An implementation is compatible if:
 - It applies strict redaction defaults and never exports secrets in plaintext.
 
 ## 4. Next step
-- Provide golden examples for `capsule.manifest.json` and `redaction.report.json`.
-- Add a CI job that runs these tests on every change.
+- Golden examples live under `examples/` (minimal / typical / redaction).
+- Add a CI job that validates examples against schemas and runs these tests on every change.

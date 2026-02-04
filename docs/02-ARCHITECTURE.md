@@ -1,4 +1,4 @@
-# Memory Capsule — Architecture v1 (OpenClaw-only, AI-first)
+# Resurrectum — Architecture v1 (OpenClaw-only, AI-first)
 
 **Audience:** AI engineers
 
@@ -16,7 +16,7 @@ A capsule is a versioned set of encrypted blobs plus a manifest.
 **High-level pipeline**
 1) **Discovery**: enumerate candidate workspace files by policy.
 2) **Classification & Redaction**: run detectors, decide per-artifact action.
-3) **Pack**: split into artifacts (files) and optionally chunks; compute hashes.
+3) **Pack**: split into artifacts (files); compute hashes.
 4) **Encrypt**: encrypt payloads; record encryption metadata.
 5) **Publish**: write to backend (local dir or S3) by **ciphertext hash**.
 6) **Manifest**: write `capsule.manifest.json`; **sign it (required v1)**.
@@ -33,7 +33,8 @@ A capsule is a versioned set of encrypted blobs plus a manifest.
 ### 2.2 Canonical IDs
 - `capsule_id` = UUIDv7 (v1)
 - `blob_id = sha256(ciphertext_bytes)` (**v1 required**; lowercase hex; do not use plaintext-hash IDs).
-- `artifact_id = sha256(normalized_path + ':' + plaintext_hash)` (optional; lowercase hex).
+- Optional extension: `x_artifact_id = sha256(normalized_path + ':' + plaintext_hash)` (lowercase hex).
+  - `normalized_path` follows the path rules in `03-SCHEMAS.md` (POSIX, NFC, no `..`).
 
 > v1 recommendation: **store ciphertext-addressed blobs** so storage never reveals plaintext hash correlation.
 
@@ -44,12 +45,9 @@ A capsule is a versioned set of encrypted blobs plus a manifest.
 
 ## 3. Packaging Strategy
 ### 3.1 File-granularity vs Chunk-granularity
-- **v1 default:** file-granularity artifacts.
-- **Optional v1 extension:** chunking for large files or dedupe across daily notes.
-
-Chunking design (if enabled):
-- fixed-size (e.g., 1–4 MiB) or content-defined chunking
-- each chunk encrypted independently (dedupe-friendly but metadata-heavy)
+- **v1:** file-granularity artifacts only (no chunking fields in the v1 manifest).
+- **v1.1+ (future):** chunking for large files or dedupe across daily notes.
+- **v1:** no compression; payload bytes are the raw (or redacted) file bytes.
 
 ## 4. Crypto Design (v1)
 ### 4.1 Goals
@@ -58,16 +56,19 @@ Chunking design (if enabled):
 - Provenance: **required signing in v1**.
 
 ### 4.2 Recommended Primitive Choices
-- AEAD: XChaCha20-Poly1305 (preferred) or AES-256-GCM.
+- AEAD: XChaCha20-Poly1305 (preferred) or AES-256-GCM (identifiers in schema: `xchacha20-poly1305` / `aes-256-gcm`).
 - KDF: HKDF-SHA256 for deriving per-blob keys from a master key.
 
 ### 4.3 Key Hierarchy (v1 minimal)
 - **Master Key (MK)**: **passphrase-derived** secret via Argon2id (v1).
-- **Data Key (DK)**: derived per blob: `DK = HKDF(MK, salt=blob_nonce, info='capsule:blob')`.
+- **Data Key (DK)**: derived per blob:
+  - `DK = HKDF-SHA256(MK, salt=base64url_decode(blob.nonce), info='capsule:blob', length=32)`.
+  - `blob.nonce` MUST be unique per blob and generated with a CSPRNG.
 
 Manifest stores:
 - algorithm identifiers
-- nonces/salts
+- Argon2id parameters + salt
+- per-blob nonces
 - *no secrets*
 
 ### 4.4 Signing (v1 locked)
@@ -104,6 +105,8 @@ Outputs per file:
 - `redaction.report.json` is written alongside manifest.
 - Findings include types and locations (line numbers) but never raw secret values.
 
+Note: `include_plaintext` means **unredacted bytes**, not unencrypted bytes. Encryption is still required in v1.
+
 ## 6. Backends
 ### 6.1 Local Directory Backend (required)
 Layout suggestion (machine layer):
@@ -122,8 +125,8 @@ Layout suggestion (machine layer):
 
 ## 7. CLI + Library Interfaces (to be specified)
 Recommend two surfaces:
-- `openclaw capsule ...` CLI
-- `capsule` Python/TS library used by CLI
+- `openclaw summon ...` CLI
+- `summon` Python/TS library used by CLI
 
 Core operations:
 - `export(workspace_path, policy, backend, key_source) -> capsule_id`
@@ -133,7 +136,7 @@ Core operations:
 ## 8. Determinism & Reproducibility (v1 locked)
 **v1 is byte-preserving (normative):**
 - Import MUST restore artifact bytes exactly.
-- `plaintext_hash` MUST be computed over the raw restored bytes and MUST verify on import.
+- `plaintext_hash` MUST be computed over the raw restored bytes (redacted bytes if applicable) and MUST verify on import.
 
 **What v1 does *not* require:**
 - Re-export producing the same ciphertext.

@@ -1,10 +1,12 @@
-# Memory Capsule ("Soul Immortality") — v1 One-Pager (OpenClaw-only)
+# Resurrectum ("Soul Immortality") — v1 One-Pager (OpenClaw-only)
+
+Resurrectum: an AI-first resurrection rite for agents — revive identity, vows, and continuity (OpenClaw v1).
 
 ## Problem
 OpenClaw agents are currently "mortal" across machines/sessions unless their working directory (memory/persona/ops) is preserved and safely moved. Teams need a **portable, versioned, encrypted, verifiable** package of an agent’s persistent state that can be exported/imported without breaking OpenClaw’s existing file conventions.
 
 ## Goal
-Define a **Memory Capsule**: a cryptographically protected, content-addressed, versioned bundle of OpenClaw state (memory + persona/contracts + ops + optional project context) that enables:
+Define a **Resurrectum**: a cryptographically protected, content-addressed, versioned bundle of OpenClaw state (memory + persona/contracts + ops + optional project context) that enables:
 - **Revival**: restore an agent to a working OpenClaw directory deterministically.
 - **Continuity**: keep long-term identity/behavior stable while allowing incremental updates.
 - **Safety**: enforce redaction boundaries so secrets/PII don’t leak to untrusted storage.
@@ -13,7 +15,7 @@ Define a **Memory Capsule**: a cryptographically protected, content-addressed, v
 AI engineers implementing the export/import pipeline, schema(s), CLI, and conformance tests.
 
 ## v1 Scope (explicit)
-**OpenClaw-only**. Capsule must be fully compatible with current OpenClaw workspace file patterns:
+**OpenClaw-only**. Resurrectum must be fully compatible with current OpenClaw workspace file patterns:
 - Memory layer: `MEMORY.md`, `memory/*.md`, and durable state JSONs under `memory/`.
 - Persona/contract layer: `SOUL.md`, `USER.md`, `IDENTITY.md`.
 - Ops layer: `AGENTS.md`, `TOOLS.md`, `HEARTBEAT.md`.
@@ -46,6 +48,7 @@ AI engineers implementing the export/import pipeline, schema(s), CLI, and confor
 - **Machine Layer contracts (must ship together)**
   - `capsule.manifest.json` + JSON Schema
   - `redaction.report.json` + JSON Schema
+  - schema versioning (`schema_version` required in all JSON docs)
   - at least **3 examples** (minimal / typical / failure-redacted)
   - **conformance tests** + fixtures (round-trip, tamper, policy)
 - **Export/Import**
@@ -59,6 +62,7 @@ AI engineers implementing the export/import pipeline, schema(s), CLI, and confor
     - bytes-to-sign fixed: RFC 8785 JCS of manifest without `signature` (UTF-8, no trailing newline)
     - verifier must pin/trust signer key/fingerprint
   - key source: **passphrase → Argon2id → master key**
+  - Argon2id params + salt recorded in manifest; HKDF `info` fixed to `capsule:blob`
 - **Redaction policy (v1)**
   - strict defaults (OpenClaw allowlist; deny secrets/PII)
   - machine-readable redaction report

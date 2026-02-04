@@ -1,11 +1,11 @@
-# Memory Capsule — Storage Backends v1 (OpenClaw-only)
+# Resurrectum — Storage Backends v1 (OpenClaw-only)
 
 **Audience:** AI engineers
 
-**v1 scope:** Storage backend interface and guarantees for OpenClaw-only Memory Capsule v1.
+**v1 scope:** Storage backend interface and guarantees for OpenClaw-only Resurrectum v1.
 
 ## 0. Purpose
-Specify the storage backend interface and required guarantees for Memory Capsule v1.
+Specify the storage backend interface and required guarantees for Resurrectum v1.
 
 ## Related docs
 - Architecture: `02-ARCHITECTURE.md`
@@ -34,6 +34,9 @@ A backend MUST implement these operations:
 
 Where:
 - `blob_id = sha256(ciphertext_bytes)` (v1 required; lowercase hex)
+- `ref` returned by `put_blob` MUST be a stable locator used in `blobs[].storage.ref`:
+  - `local_dir`: relative path from capsule root (e.g., `capsules/<capsule_id>/blobs/<blob_id>`)
+  - `s3`: object key within the bucket/prefix (bucket is supplied out-of-band by `--out`)
 - documents include:
   - `capsule.manifest.json`
   - `redaction.report.json`

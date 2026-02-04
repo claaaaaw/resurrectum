@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openclaw.ai/specs/resurrectum/schemas/v1/redaction.report.schema.json",
+  "title": "Resurrectum Redaction Report v1",
+  "type": "object",
+  "additionalProperties": false,
+  "patternProperties": { "^x_": {} },
+  "required": [
+    "spec_version",
+    "schema_version",
+    "policy_version",
+    "created_at",
+    "capsule_id",
+    "detectors",
+    "decisions",
+    "findings",
+    "findings_summary"
+  ],
+  "properties": {
+    "spec_version": { "const": "v1" },
+    "schema_version": { "$ref": "#/$defs/semver" },
+    "policy_version": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "capsule_id": { "$ref": "#/$defs/uuidv7" },
+    "detectors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "patternProperties": { "^x_": {} },
+        "required": ["id", "config_hash"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "version": { "type": "string" },
+          "config_hash": { "$ref": "#/$defs/hex64" }
+        }
+      }
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "patternProperties": { "^x_": {} },
+        "required": ["path", "decision", "class", "reasons"],
+        "properties": {
+          "path": { "$ref": "#/$defs/path" },
+          "decision": {
+            "type": "string",
+            "enum": ["exclude", "include_encrypted", "include_redacted", "include_plaintext"]
+          },
+          "class": {
+            "type": "string",
+            "enum": ["public", "private", "sensitive", "forbidden"]
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1
+          },
+          "detector_hits": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "patternProperties": { "^x_": {} },
+        "required": ["path", "rule_id", "severity", "locations"],
+        "properties": {
+          "path": { "$ref": "#/$defs/path" },
+          "rule_id": { "type": "string" },
+          "severity": { "type": "string", "enum": ["low", "medium", "high"] },
+          "locations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "patternProperties": { "^x_": {} },
+              "properties": {
+                "line": { "type": "integer", "minimum": 1 },
+                "start_byte": { "type": "integer", "minimum": 0 },
+                "end_byte": { "type": "integer", "minimum": 0 }
+              },
+              "anyOf": [
+                { "required": ["line"] },
+                { "required": ["start_byte"] },
+                { "required": ["end_byte"] }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "findings_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": { "^x_": {} },
+      "required": ["total", "by_class", "by_decision"],
+      "properties": {
+        "total": { "type": "integer", "minimum": 0 },
+        "by_class": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "public": { "type": "integer", "minimum": 0 },
+            "private": { "type": "integer", "minimum": 0 },
+            "sensitive": { "type": "integer", "minimum": 0 },
+            "forbidden": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "by_decision": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "exclude": { "type": "integer", "minimum": 0 },
+            "include_encrypted": { "type": "integer", "minimum": 0 },
+            "include_redacted": { "type": "integer", "minimum": 0 },
+            "include_plaintext": { "type": "integer", "minimum": 0 }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "hex64": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "uuidv7": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "semver": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "path": {
+      "type": "string",
+      "pattern": "^(?!/)(?!.*\\\\)(?!^[A-Za-z]:)(?!.*(?:^|/)\\.\\.(?:/|$)).+"
+    }
+  }
+}

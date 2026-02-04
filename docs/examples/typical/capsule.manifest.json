@@ -1,0 +1,134 @@
+{
+  "spec_version": "v1",
+  "schema_version": "1.0.0",
+  "capsule_id": "018f4b50-1b8c-7b3e-9b1a-9d7d3f0c5a55",
+  "created_at": "2026-02-04T09:15:30Z",
+  "tool": {
+    "name": "openclaw-resurrectum",
+    "version": "1.0.0"
+  },
+  "source": {
+    "workspace_fingerprint": "018f4b50-1b8c-7b3e-9b1a-9d7d3f0c5a56",
+    "openclaw_version": "0.1.0",
+    "host_tz": "America/Los_Angeles"
+  },
+  "crypto": {
+    "aead": "aes-256-gcm",
+    "kdf": "hkdf-sha256",
+    "key_source": "passphrase_argon2id",
+    "hkdf_info": "capsule:blob",
+    "kdf_params": {
+      "alg": "argon2id",
+      "salt": "s7G6G7sT4u4aGm9x5W3p9A",
+      "mem_kib": 65536,
+      "iterations": 3,
+      "parallelism": 1,
+      "hash_len": 32
+    }
+  },
+  "artifacts": [
+    {
+      "path": "MEMORY.md",
+      "kind": "memory",
+      "mode": "include_encrypted",
+      "plaintext_hash": "b1c2d3e4f5061728b1c2d3e4f5061728b1c2d3e4f5061728b1c2d3e4f5061728",
+      "size_bytes": 412,
+      "blob_id": "0a1b2c3d4e5f60710a1b2c3d4e5f60710a1b2c3d4e5f60710a1b2c3d4e5f6071"
+    },
+    {
+      "path": "memory/2026-02-03.md",
+      "kind": "memory",
+      "mode": "include_encrypted",
+      "plaintext_hash": "c0ffee1234567890c0ffee1234567890c0ffee1234567890c0ffee1234567890",
+      "size_bytes": 1024,
+      "blob_id": "1122334455667788112233445566778811223344556677881122334455667788"
+    },
+    {
+      "path": "SOUL.md",
+      "kind": "persona",
+      "mode": "include_encrypted",
+      "plaintext_hash": "deadbeef00112233deadbeef00112233deadbeef00112233deadbeef00112233",
+      "size_bytes": 980,
+      "blob_id": "99aa88bb77cc66dd99aa88bb77cc66dd99aa88bb77cc66dd99aa88bb77cc66dd"
+    },
+    {
+      "path": "AGENTS.md",
+      "kind": "ops",
+      "mode": "include_encrypted",
+      "plaintext_hash": "1111222233334444111122223333444411112222333344441111222233334444",
+      "size_bytes": 256,
+      "blob_id": "cafebabedeadbeefcafebabedeadbeefcafebabedeadbeefcafebabedeadbeef"
+    },
+    {
+      "path": "projects/demo/STATUS.md",
+      "kind": "project",
+      "mode": "include_encrypted",
+      "plaintext_hash": "2222333344445555222233334444555522223333444455552222333344445555",
+      "size_bytes": 144,
+      "blob_id": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+    }
+  ],
+  "blobs": [
+    {
+      "blob_id": "0a1b2c3d4e5f60710a1b2c3d4e5f60710a1b2c3d4e5f60710a1b2c3d4e5f6071",
+      "ciphertext_hash": "0a1b2c3d4e5f60710a1b2c3d4e5f60710a1b2c3d4e5f60710a1b2c3d4e5f6071",
+      "ciphertext_size_bytes": 520,
+      "nonce": "u7gNq1L5m3Xz9YhK",
+      "storage": {
+        "backend": "local_dir",
+        "ref": "capsules/018f4b50-1b8c-7b3e-9b1a-9d7d3f0c5a55/blobs/0a1b2c3d4e5f60710a1b2c3d4e5f60710a1b2c3d4e5f60710a1b2c3d4e5f6071"
+      }
+    },
+    {
+      "blob_id": "1122334455667788112233445566778811223344556677881122334455667788",
+      "ciphertext_hash": "1122334455667788112233445566778811223344556677881122334455667788",
+      "ciphertext_size_bytes": 1180,
+      "nonce": "V2k8sR4pM6n1Q0wZ",
+      "storage": {
+        "backend": "local_dir",
+        "ref": "capsules/018f4b50-1b8c-7b3e-9b1a-9d7d3f0c5a55/blobs/1122334455667788112233445566778811223344556677881122334455667788"
+      }
+    },
+    {
+      "blob_id": "99aa88bb77cc66dd99aa88bb77cc66dd99aa88bb77cc66dd99aa88bb77cc66dd",
+      "ciphertext_hash": "99aa88bb77cc66dd99aa88bb77cc66dd99aa88bb77cc66dd99aa88bb77cc66dd",
+      "ciphertext_size_bytes": 1120,
+      "nonce": "p0L7xQ2nM8dR6tS1",
+      "storage": {
+        "backend": "local_dir",
+        "ref": "capsules/018f4b50-1b8c-7b3e-9b1a-9d7d3f0c5a55/blobs/99aa88bb77cc66dd99aa88bb77cc66dd99aa88bb77cc66dd99aa88bb77cc66dd"
+      }
+    },
+    {
+      "blob_id": "cafebabedeadbeefcafebabedeadbeefcafebabedeadbeefcafebabedeadbeef",
+      "ciphertext_hash": "cafebabedeadbeefcafebabedeadbeefcafebabedeadbeefcafebabedeadbeef",
+      "ciphertext_size_bytes": 320,
+      "nonce": "m3B2n8Qk4s7T5yR1",
+      "storage": {
+        "backend": "local_dir",
+        "ref": "capsules/018f4b50-1b8c-7b3e-9b1a-9d7d3f0c5a55/blobs/cafebabedeadbeefcafebabedeadbeefcafebabedeadbeefcafebabedeadbeef"
+      }
+    },
+    {
+      "blob_id": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "ciphertext_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "ciphertext_size_bytes": 240,
+      "nonce": "R7n2p5M0q8V1t3Z6",
+      "storage": {
+        "backend": "local_dir",
+        "ref": "capsules/018f4b50-1b8c-7b3e-9b1a-9d7d3f0c5a55/blobs/0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+      }
+    }
+  ],
+  "redaction": {
+    "report_path": "redaction.report.json",
+    "policy_version": "v1.0.0"
+  },
+  "signature": {
+    "alg": "ed25519",
+    "payload_alg": "rfc8785_jcs_without_signature_utf8",
+    "public_key": "eC2lZ0mQ4s6tR2n9kU0bP3xV1wG7hD9jK2fA4cB8mN0",
+    "signer_fingerprint": "5a4b3c2d1e0f98765a4b3c2d1e0f98765a4b3c2d1e0f98765a4b3c2d1e0f9876",
+    "sig": "V1y2Z3x4W5u6t7s8r9q0p1o2n3m4l5k6j7i8h9g0f1e2d3c4b5a6Z7Y8X9W0V1U2"
+  }
+}

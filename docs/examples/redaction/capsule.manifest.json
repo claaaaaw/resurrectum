@@ -1,0 +1,80 @@
+{
+  "spec_version": "v1",
+  "schema_version": "1.0.0",
+  "capsule_id": "018f4b50-1b8c-7b3e-9b1a-9d7d3f0c5a77",
+  "created_at": "2026-02-04T10:05:12Z",
+  "tool": {
+    "name": "openclaw-resurrectum",
+    "version": "1.0.0"
+  },
+  "source": {
+    "workspace_fingerprint": "018f4b50-1b8c-7b3e-9b1a-9d7d3f0c5a78",
+    "openclaw_version": "0.1.0",
+    "host_tz": "America/Los_Angeles"
+  },
+  "crypto": {
+    "aead": "xchacha20-poly1305",
+    "kdf": "hkdf-sha256",
+    "key_source": "passphrase_argon2id",
+    "hkdf_info": "capsule:blob",
+    "kdf_params": {
+      "alg": "argon2id",
+      "salt": "mZ5s7Aqv6Xn3Dk1pV8r2Hw",
+      "mem_kib": 65536,
+      "iterations": 3,
+      "parallelism": 1,
+      "hash_len": 32
+    }
+  },
+  "artifacts": [
+    {
+      "path": "MEMORY.md",
+      "kind": "memory",
+      "mode": "include_encrypted",
+      "plaintext_hash": "abcdeffedcba1234abcdeffedcba1234abcdeffedcba1234abcdeffedcba1234",
+      "size_bytes": 310,
+      "blob_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    {
+      "path": "memory/2026-02-03.md",
+      "kind": "memory",
+      "mode": "include_redacted",
+      "plaintext_hash": "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      "size_bytes": 840,
+      "blob_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    }
+  ],
+  "blobs": [
+    {
+      "blob_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "ciphertext_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "ciphertext_size_bytes": 412,
+      "nonce": "N8r7kQ2pL0m5V1xT6yZ3a9B4c7d8e9f0",
+      "storage": {
+        "backend": "local_dir",
+        "ref": "capsules/018f4b50-1b8c-7b3e-9b1a-9d7d3f0c5a77/blobs/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      }
+    },
+    {
+      "blob_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "ciphertext_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "ciphertext_size_bytes": 980,
+      "nonce": "f1e2d3c4b5a6Z7Y8X9W0V1U2t3s4r5q6",
+      "storage": {
+        "backend": "local_dir",
+        "ref": "capsules/018f4b50-1b8c-7b3e-9b1a-9d7d3f0c5a77/blobs/cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    }
+  ],
+  "redaction": {
+    "report_path": "redaction.report.json",
+    "policy_version": "v1.0.0"
+  },
+  "signature": {
+    "alg": "ed25519",
+    "payload_alg": "rfc8785_jcs_without_signature_utf8",
+    "public_key": "Q2m3n4B5v6C7x8Z9y0a1b2c3D4e5F6g7H8i9J0k1L2M",
+    "signer_fingerprint": "7c6d5e4f3a2b19087c6d5e4f3a2b19087c6d5e4f3a2b19087c6d5e4f3a2b1908",
+    "sig": "T0x1y2Z3W4v5u6t7s8r9q0p1o2n3m4l5k6j7i8h9g0f1e2d3c4b5a6Z7Y8X9W0"
+  }
+}

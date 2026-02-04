@@ -1,0 +1,85 @@
+{
+  "spec_version": "v1",
+  "schema_version": "1.0.0",
+  "policy_version": "v1.0.0",
+  "created_at": "2026-02-04T10:05:12Z",
+  "capsule_id": "018f4b50-1b8c-7b3e-9b1a-9d7d3f0c5a77",
+  "detectors": [
+    {
+      "id": "builtin-basic",
+      "version": "1.0.0",
+      "config_hash": "4d3c2b1a0f9e8d7c4d3c2b1a0f9e8d7c4d3c2b1a0f9e8d7c4d3c2b1a0f9e8d7c"
+    }
+  ],
+  "decisions": [
+    {
+      "path": "MEMORY.md",
+      "decision": "include_encrypted",
+      "class": "private",
+      "reasons": ["allowlist"],
+      "detector_hits": []
+    },
+    {
+      "path": "memory/2026-02-03.md",
+      "decision": "include_redacted",
+      "class": "sensitive",
+      "reasons": ["allowlist", "redacted"],
+      "detector_hits": ["pii-email"]
+    },
+    {
+      "path": ".env",
+      "decision": "exclude",
+      "class": "forbidden",
+      "reasons": ["denylist"],
+      "detector_hits": ["env-file"]
+    },
+    {
+      "path": "memory/moltbook.json",
+      "decision": "exclude",
+      "class": "forbidden",
+      "reasons": ["denylist"],
+      "detector_hits": ["token-string"]
+    }
+  ],
+  "findings": [
+    {
+      "path": ".env",
+      "rule_id": "env-file",
+      "severity": "high",
+      "locations": [
+        { "line": 1 }
+      ]
+    },
+    {
+      "path": "memory/moltbook.json",
+      "rule_id": "token-string",
+      "severity": "high",
+      "locations": [
+        { "line": 12 }
+      ]
+    },
+    {
+      "path": "memory/2026-02-03.md",
+      "rule_id": "pii-email",
+      "severity": "medium",
+      "locations": [
+        { "line": 45 }
+      ]
+    }
+  ],
+  "findings_summary": {
+    "total": 3,
+    "by_class": {
+      "public": 0,
+      "private": 0,
+      "sensitive": 1,
+      "forbidden": 2
+    },
+    "by_decision": {
+      "exclude": 2,
+      "include_encrypted": 1,
+      "include_redacted": 1,
+      "include_plaintext": 0
+    }
+  }
+}
