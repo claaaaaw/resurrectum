@@ -1,13 +1,16 @@
-# Resurrectum — Architecture v1 (OpenClaw-only, AI-first)
+# Resurrectum — Architecture v1.1 (OpenClaw-only, AI-first)
 
 **Audience:** AI engineers
 
-**v1 scope:** OpenClaw-only. AI-first: Machine Layer contracts are canonical; this doc must not contradict `03-SCHEMAS.md`.
+**v1.1 scope:** OpenClaw-only. AI-first: Machine Layer contracts are canonical; this doc must not contradict `03-SCHEMAS.md`.
 
 ## 0. Design Constraints
 - **OpenClaw compatibility:** capsule MUST operate on the current workspace layout and file semantics (no required format changes).
 - **AI-first:** machine-readable artifacts (schemas/manifests/examples/tests) are the source of truth.
 - **Untrusted remote:** remote storage is treated as hostile; confidentiality and integrity must be client-enforced.
+- **Client-first:** all business logic (encryption/signing/verification) executes on client side.
+- **Stateless service:** credential service has no database, no KV, no persistent state.
+- **Decentralization-ready:** architecture designed for future migration to IPFS/decentralized storage.
 - **Extensible:** reserve room for future: multi-agent graphs, vector indexes, IPFS cold backup, merge semantics.
 
 ## 1. System Overview
@@ -30,13 +33,54 @@ A capsule is a versioned set of encrypted blobs plus a manifest.
 - **KeyEnvelope**: how data keys are derived/wrapped (v1 simple; future rotation).
 - **RedactionReport**: decision log.
 
-### 2.2 Canonical IDs
-- `capsule_id` = UUIDv7 (v1)
+### 2.2 Identity Model (v1.1)
+User identity is based on Ed25519 public key fingerprint:
+```
+User Identity = sha256(public_key_bytes) → hex string (64 characters)
+
+No traditional "user registration":
+1. Client generates Ed25519 keypair locally (resurrectum init)
+2. Public key fingerprint = sha256(public_key_bytes) → hex string
+3. Identity IS the fingerprint, no server-side record needed
+```
+
+### 2.3 Canonical IDs
+- `capsule_id` = `{owner_fingerprint}/{uuid}` (v1.1 format)
+  - `owner_fingerprint`: 64 hex chars (sha256 of owner's public key)
+  - `uuid`: UUIDv7
+  - Example: `a1b2c3d4e5f67890.../01234567-89ab-cdef-0123-456789abcdef`
 - `blob_id = sha256(ciphertext_bytes)` (**v1 required**; lowercase hex; do not use plaintext-hash IDs).
 - Optional extension: `x_artifact_id = sha256(normalized_path + ':' + plaintext_hash)` (lowercase hex).
   - `normalized_path` follows the path rules in `03-SCHEMAS.md` (POSIX, NFC, no `..`).
 
 > v1 recommendation: **store ciphertext-addressed blobs** so storage never reveals plaintext hash correlation.
+
+### 2.4 Access Control Model (v1.1)
+```json
+// manifest.json access field
+{
+  "access": {
+    "owner": "ed25519:a1b2c3d4...",
+    "readers": [
+      "ed25519:e5f6g7h8...",
+      "ed25519:i9j0k1l2..."
+    ],
+    "public": false
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `owner` | string | Owner's public key fingerprint, has write permission |
+| `readers` | string[] | Authorized readers list (optional) |
+| `public` | boolean | Whether publicly accessible (default false) |
+
+Permission check logic:
+```
+read:  owner OR readers[] contains requester OR public=true
+write: owner must match
+```
 
 ### 2.3 Reserved Fields for Future
 - `parents[]` for DAG history.
@@ -47,7 +91,34 @@ A capsule is a versioned set of encrypted blobs plus a manifest.
 ### 3.1 File-granularity vs Chunk-granularity
 - **v1:** file-granularity artifacts only (no chunking fields in the v1 manifest).
 - **v1.1+ (future):** chunking for large files or dedupe across daily notes.
-- **v1:** no compression; payload bytes are the raw (or redacted) file bytes.
+
+### 3.2 Compression (v1.1)
+- **v1.1:** optional 7z compression for storage efficiency.
+- When enabled, all files are packed into a single 7z archive before encryption.
+- Typical space savings: 60-80% for text-heavy workspaces.
+
+```
+Export flow (with compression):
+┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+│ Scan     │───>│ Filter   │───>│ Pack 7z  │───>│ Encrypt  │───>│ Upload   │
+│ workspace│    │ excludes │    │ compress │    │ sign     │    │ single   │
+└──────────┘    └──────────┘    └──────────┘    └──────────┘    │ blob     │
+                                                                 └──────────┘
+```
+
+Manifest compression field:
+```json
+{
+  "compression": {
+    "enabled": true,
+    "algorithm": "7z",
+    "level": 9,
+    "original_size_bytes": 1234567,
+    "compressed_size_bytes": 345678,
+    "compression_ratio": 0.28
+  }
+}
+```
 
 ## 4. Crypto Design (v1)
 ### 4.1 Goals
@@ -109,16 +180,52 @@ Note: `include_plaintext` means **unredacted bytes**, not unencrypted bytes. Enc
 
 ## 6. Backends
 ### 6.1 Local Directory Backend (required)
-Layout suggestion (machine layer):
-- `capsules/<capsule_id>/capsule.manifest.json`
-- `capsules/<capsule_id>/blobs/<blob_id>`
-- `capsules/<capsule_id>/redaction.report.json`
+Layout (v1.1 with owner_fp/uuid capsule_id):
+```
+<out>/
+  capsules/
+    {owner_fingerprint}/{uuid}/
+      capsule.manifest.json
+      redaction.report.json
+      blobs/
+        {blob_id}
+```
+
+Example:
+```
+capsules/a1b2c3d4e5f67890.../01234567-89ab-cdef-0123-456789abcdef/
+  ├── capsule.manifest.json
+  ├── redaction.report.json
+  └── blobs/
+      ├── abc123def456789...
+      └── 789xyz123abc456...
+```
 
 ### 6.2 S3/MinIO Backend (v1)
 - bucket prefix per capsule_id
 - objects stored by blob_id
 
-### 6.3 Future: IPFS Cold Backup
+### 6.3 Presigned URL Backend (v1.1)
+For Cloudflare R2 and other S3-compatible storage:
+- Client signs request → Credential service
+- Credential service validates → Returns presigned URLs
+- Client uses URLs directly with R2
+- No proxy through credential service (low latency)
+
+```
+Export flow:
+┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+│ Client   │───>│ Cred Svc │───>│ Read     │───>│ Issue    │
+│ sign req │    │ verify   │    │ manifest │    │ URLs     │
+└──────────┘    └──────────┘    │ (new:skip)│    └────┬─────┘
+                                └──────────┘         │
+┌──────────┐    ┌──────────┐    ┌──────────┐         │
+│ Upload   │<───│ Direct   │<───│ Client   │<────────┘
+│ complete │    │ R2 upload│    │ encrypt  │
+└──────────┘    └──────────┘    └──────────┘
+```
+
+### 6.4 Future: IPFS Cold Backup (v1.1+)
 - store only encrypted blobs
 - publish manifest hash (or signed manifest) as a verifiable pointer
 - deletion semantics: never promise deletion on IPFS

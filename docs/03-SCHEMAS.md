@@ -1,8 +1,8 @@
-# Resurrectum — Schemas v1 (Machine Layer, OpenClaw-only)
+# Resurrectum — Schemas v1.1 (Machine Layer, OpenClaw-only)
 
 **Audience:** AI engineers
 
-**v1 scope:** Normative Machine Layer contracts for OpenClaw-only Resurrectum v1.
+**v1.1 scope:** Normative Machine Layer contracts for OpenClaw-only Resurrectum v1.1.
 
 ## 0. Goal
 This document defines the **canonical Machine Layer contracts** for Resurrectum v1.
@@ -26,13 +26,16 @@ This document defines the **canonical Machine Layer contracts** for Resurrectum 
 - Unknown non-`x_` fields MUST be rejected as schema-invalid.
 - Extension fields MUST be prefixed with `x_` and MUST NOT change v1 semantics.
 
-## 2. Common encodings & normalization (v1, normative)
-To prevent implementation forks, v1 fixes encodings and path rules:
+## 2. Common encodings & normalization (v1.1, normative)
+To prevent implementation forks, v1.1 fixes encodings and path rules:
 - **All hashes are lowercase hex**.
   - `sha256` = 64 hex chars.
 - **Nonces/salts are base64url (unpadded)** per RFC 4648 URL-safe alphabet.
 - **Signatures and public keys are base64url (unpadded)**.
-- `capsule_id` is a **UUIDv7** string.
+- `capsule_id` format (v1.1): **`{owner_fingerprint}/{uuid}`**
+  - `owner_fingerprint`: 64 hex chars (sha256 of owner's Ed25519 public key)
+  - `uuid`: UUIDv7 string
+  - Example: `a1b2c3d4e5f67890abcdef1234567890abcdef1234567890abcdef1234567890/01925b6a-7c8d-7def-9012-345678abcdef`
 - `created_at` uses RFC3339 timestamps.
 - `path` normalization for artifacts:
   - POSIX-style `/` separators only.
@@ -58,10 +61,10 @@ Describes one capsule snapshot:
 - how to validate integrity
 - how to apply policy/redaction decisions
 
-### 4.2 Required top-level fields (v1)
+### 4.2 Required top-level fields (v1.1)
 - `spec_version` (string) — MUST be `"v1"`
-- `schema_version` (string) — semver for the manifest schema (e.g. `"1.0.0"`)
-- `capsule_id` (string) — UUIDv7
+- `schema_version` (string) — semver for the manifest schema (e.g. `"1.1.0"`)
+- `capsule_id` (string) — `{owner_fingerprint}/{uuid}` format (v1.1)
 - `created_at` (RFC3339 string)
 - `tool` (object): `{ name, version }`
 - `source` (object): `{ workspace_fingerprint?, openclaw_version?, host_tz? }` (non-sensitive only)
@@ -84,6 +87,48 @@ Describes one capsule snapshot:
   - `report_path` (string) => MUST be `redaction.report.json`
   - `policy_version` (string)
 - `signature` (object) **required v1**
+
+### 4.2.0 Access control field (v1.1, optional)
+- `access` (object) — access control configuration
+  - `owner` (string): owner's public key fingerprint prefixed with algorithm (e.g., `"ed25519:a1b2c3d4..."`)
+  - `readers` (array of strings): list of authorized reader fingerprints (optional)
+  - `public` (boolean): whether capsule is publicly accessible (default: false)
+
+Example:
+```json
+{
+  "access": {
+    "owner": "ed25519:a1b2c3d4e5f67890abcdef1234567890abcdef1234567890abcdef1234567890",
+    "readers": [
+      "ed25519:e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2g3h4i5j6"
+    ],
+    "public": false
+  }
+}
+```
+
+### 4.2.0a Compression field (v1.1, optional)
+- `compression` (object) — compression configuration (only present if compression was used)
+  - `enabled` (boolean): whether compression was used
+  - `algorithm` (string): compression algorithm (currently only `"7z"` supported)
+  - `level` (int): compression level 0-9
+  - `original_size_bytes` (int): total size before compression
+  - `compressed_size_bytes` (int): size after compression
+  - `compression_ratio` (float): ratio of compressed to original size
+
+Example:
+```json
+{
+  "compression": {
+    "enabled": true,
+    "algorithm": "7z",
+    "level": 9,
+    "original_size_bytes": 1234567,
+    "compressed_size_bytes": 345678,
+    "compression_ratio": 0.28
+  }
+}
+```
 
 AEAD nonce length is implied by `crypto.aead`:
 - `xchacha20-poly1305` → 24-byte nonce
@@ -153,16 +198,19 @@ Any compression is non-conformant in v1.
 **Blob IDs MUST be derived from ciphertext bytes in v1.**
 - `blob_id = sha256(ciphertext_bytes)` (**lowercase hex**)
 
-### 5.2 Blob record fields (v1)
+### 5.2 Blob record fields (v1.1)
 - `blob_id` (string) — lowercase hex `sha256(ciphertext_bytes)`
 - `ciphertext_hash` (string) — same as `blob_id` (kept for clarity)
 - `ciphertext_size_bytes` (int)
 - `nonce` (string) — base64url (unpadded)
 - `storage` (object)
-  - `backend` (string): `local_dir | s3`
+  - `backend` (string): `local_dir | s3 | presigned_url`
   - `ref` (string): backend-specific locator
     - `local_dir`: relative path from the capsule root (e.g., `capsules/<capsule_id>/blobs/<blob_id>`)
     - `s3`: object key within the bucket/prefix (bucket is supplied out-of-band by `--out`)
+    - `presigned_url`: same as s3 format (URL obtained via credential service)
+- `is_archive` (boolean, optional) — if true, blob contains a compressed archive (v1.1)
+- `archive_format` (string, optional) — archive format, e.g., `"7z"` (required if `is_archive` is true)
 
 ## 5.3 Consistency rules (v1, normative)
 - `artifacts[].path` MUST be unique within a manifest.
