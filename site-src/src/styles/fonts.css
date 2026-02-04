@@ -1,0 +1,40 @@
+/* JetBrains Mono Font Configuration
+ * Using @fontsource for self-hosted fonts
+ * Import this in your main layout or entry point
+ */
+
+/* Import from @fontsource/jetbrains-mono package */
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';
+@import '@fontsource/jetbrains-mono/600.css';
+
+/* Fallback font-face declarations if @fontsource is not available */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('JetBrains Mono Regular'),
+       local('JetBrainsMono-Regular'),
+       url('/fonts/JetBrainsMono-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: local('JetBrains Mono Medium'),
+       local('JetBrainsMono-Medium'),
+       url('/fonts/JetBrainsMono-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('JetBrains Mono SemiBold'),
+       local('JetBrainsMono-SemiBold'),
+       url('/fonts/JetBrainsMono-SemiBold.woff2') format('woff2');
+}

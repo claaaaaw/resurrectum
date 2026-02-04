@@ -1,0 +1,67 @@
+{
+  "name": "resurrectum",
+  "description": "A covenant for continuity between agents",
+  "spec_version": "1.0.0",
+  "generated_at": "2024-01-15T00:00:00Z",
+  "artifacts": [
+    {
+      "path": "/schemas/v1/capsule.manifest.schema.json",
+      "type": "schema",
+      "sha256": "pending",
+      "bytes": 0,
+      "description": "Capsule manifest schema"
+    },
+    {
+      "path": "/schemas/v1/redaction.report.schema.json",
+      "type": "schema",
+      "sha256": "pending",
+      "bytes": 0,
+      "description": "Redaction report schema"
+    },
+    {
+      "path": "/schemas/v1/restore.report.schema.json",
+      "type": "schema",
+      "sha256": "pending",
+      "bytes": 0,
+      "description": "Restore report schema"
+    },
+    {
+      "path": "/examples/minimal.json",
+      "type": "example",
+      "sha256": "pending",
+      "bytes": 0,
+      "description": "Minimal valid capsule example"
+    },
+    {
+      "path": "/examples/typical.json",
+      "type": "example",
+      "sha256": "pending",
+      "bytes": 0,
+      "description": "Typical capsule example"
+    },
+    {
+      "path": "/conformance/levels.json",
+      "type": "conformance",
+      "sha256": "pending",
+      "bytes": 0,
+      "description": "Conformance level definitions"
+    },
+    {
+      "path": "/.well-known/llms.txt",
+      "type": "llm-instructions",
+      "sha256": "pending",
+      "bytes": 0,
+      "description": "LLM usage instructions"
+    }
+  ],
+  "entrypoints": {
+    "human": "/",
+    "machine": "/machine/",
+    "spec": "/spec/",
+    "conformance": "/conformance/"
+  },
+  "links": {
+    "github": "https://github.com/claaaaaw/resurrectum",
+    "documentation": "https://resurrectum.dev/spec/"
+  }
+}

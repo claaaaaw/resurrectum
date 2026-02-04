@@ -1,0 +1,178 @@
+---
+title: Protocol
+description: Wire format and operations for Resurrectum
+---
+
+## Overview
+
+This document specifies the operations and data flows for Resurrectum capsule management.
+
+---
+
+## 1. Export Operation {#export}
+
+### 1.1 Flow
+
+```
+┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+│  Scan    │───▶│  Filter  │───▶│ Encrypt  │───▶│  Upload  │
+│ Workspace│    │ (Policy) │    │  & Sign  │    │  Blobs   │
+└──────────┘    └──────────┘    └──────────┘    └──────────┘
+```
+
+### 1.2 Steps
+
+:::caution[Normative †]
+1. **Scan:** Enumerate all files in workspace
+2. **Classify:** Apply redaction policy to each file
+3. **Generate Report:** Create redaction report
+4. **Encrypt:** For each included artifact:
+   - Generate random nonce
+   - Encrypt with derived key using XChaCha20-Poly1305
+   - Compute blob_id as SHA-256(ciphertext)
+5. **Build Manifest:** Assemble artifact and blob references
+6. **Sign:** Sign manifest with Ed25519 key
+7. **Upload:** Store blobs and manifest to backend
+:::
+
+---
+
+## 2. Import Operation {#import}
+
+### 2.1 Flow
+
+```
+┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+│ Download │───▶│  Verify  │───▶│ Decrypt  │───▶│  Restore │
+│ Manifest │    │ Signature│    │  Blobs   │    │  Files   │
+└──────────┘    └──────────┘    └──────────┘    └──────────┘
+```
+
+### 2.2 Steps
+
+:::caution[Normative †]
+1. **Fetch Manifest:** Download from storage backend
+2. **Verify Signature:** Using pre-trusted signer fingerprint
+3. **Validate Schema:** Against canonical JSON Schema
+4. **Derive Key:** From passphrase using stored parameters
+5. **Download Blobs:** Fetch encrypted content
+6. **Verify Hashes:** Confirm blob_id matches SHA-256(ciphertext)
+7. **Decrypt:** Using derived key and stored nonce
+8. **Verify Plaintext:** Confirm plaintext_hash matches
+9. **Restore:** Write files to target workspace
+:::
+
+---
+
+## 3. Redaction Policy {#redaction}
+
+### 3.1 Classification Rules
+
+:::caution[Normative †]
+Files **MUST** be classified according to these rules:
+
+| Pattern | Classification | Reason |
+|---------|---------------|--------|
+| `.env*` | forbidden | Environment secrets |
+| `*.key`, `*.pem` | forbidden | Private keys |
+| `credentials*` | forbidden | Credentials |
+| `*_cookie*`, `*session*` | sensitive | Session data |
+| `MEMORY.md`, `memory/*` | private | Agent memory |
+| `SOUL.md`, `IDENTITY.md` | private | Agent persona |
+| `*.md`, `*.txt` | private | General content |
+| `*` (default) | private | Fallback |
+:::
+
+### 3.2 Override Mechanism
+
+:::note[Informative ⟂]
+Users MAY override classifications via:
+
+1. `.resurrectum/policy.yaml` in workspace root
+2. CLI flags: `--include`, `--exclude`
+3. Environment variable: `RESURRECTUM_POLICY`
+
+Overrides cannot promote `forbidden` items to any other classification.
+:::
+
+---
+
+## 4. Key Derivation {#key-derivation}
+
+### 4.1 Parameters
+
+:::caution[Normative †]
+Key derivation **MUST** use Argon2id with:
+
+```json
+{
+  "algorithm": "argon2id",
+  "memory_kb": 65536,
+  "iterations": 3,
+  "parallelism": 4,
+  "salt_bytes": 16,
+  "hash_bytes": 32
+}
+```
+:::
+
+### 4.2 Process
+
+```
+passphrase + salt → Argon2id → master_key (32 bytes)
+master_key → HKDF-SHA256 → encryption_key
+```
+
+---
+
+## 5. Signature Format {#signature}
+
+### 5.1 Structure
+
+:::caution[Normative †]
+The signature object **MUST** contain:
+
+```json
+{
+  "algorithm": "ed25519",
+  "public_key": "<base64url-encoded-pk>",
+  "signature": "<base64url-encoded-sig>",
+  "signed_at": "<ISO-8601-timestamp>"
+}
+```
+:::
+
+### 5.2 Signing Process
+
+1. Remove `signature` field from manifest
+2. Canonicalize JSON (sorted keys, no whitespace)
+3. Sign UTF-8 bytes with Ed25519 private key
+4. Encode signature as base64url
+
+---
+
+## 6. Storage Reference Format {#storage}
+
+### 6.1 Blob Reference
+
+```json
+{
+  "blob_id": "sha256-hex-64-chars",
+  "ciphertext_hash": "sha256-hex-64-chars",
+  "ciphertext_size_bytes": 12345,
+  "nonce": "base64url-encoded-24-bytes",
+  "storage": {
+    "backend": "local|s3|r2|ipfs",
+    "ref": "backend-specific-reference"
+  }
+}
+```
+
+### 6.2 Backend References
+
+| Backend | Reference Format |
+|---------|-----------------|
+| `local` | Absolute file path |
+| `s3` | `s3://{bucket}/{key}` |
+| `r2` | `r2://{bucket}/{key}` |
+| `ipfs` | `ipfs://{cid}` |

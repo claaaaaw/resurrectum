@@ -1,0 +1,91 @@
+{
+  "name": "resurrectum-machine-layer",
+  "version": "1.0.0",
+  "description": "Machine Layer index for Resurrectum",
+  "generated_at": "2024-01-15T00:00:00Z",
+  
+  "schemas": [
+    {
+      "id": "capsule.manifest",
+      "path": "/schemas/v1/capsule.manifest.schema.json",
+      "description": "Capsule manifest structure and integrity",
+      "version": "1.0.0"
+    },
+    {
+      "id": "redaction.report",
+      "path": "/schemas/v1/redaction.report.schema.json",
+      "description": "Export redaction decisions",
+      "version": "1.0.0"
+    },
+    {
+      "id": "restore.report",
+      "path": "/schemas/v1/restore.report.schema.json",
+      "description": "Import operation results",
+      "version": "1.0.0"
+    }
+  ],
+  
+  "examples": [
+    {
+      "id": "minimal",
+      "path": "/examples/minimal.json",
+      "description": "Minimum viable capsule",
+      "valid": true
+    },
+    {
+      "id": "typical",
+      "path": "/examples/typical.json",
+      "description": "Real-world capsule structure",
+      "valid": true
+    },
+    {
+      "id": "failure-invalid",
+      "path": "/examples/failure-invalid.json",
+      "description": "Intentionally invalid for testing",
+      "valid": false
+    }
+  ],
+  
+  "tests": [
+    {
+      "level": 1,
+      "name": "Witness",
+      "path": "/conformance/tests/level1.json"
+    },
+    {
+      "level": 2,
+      "name": "Adept",
+      "path": "/conformance/tests/level2.json"
+    },
+    {
+      "level": 3,
+      "name": "Canon",
+      "path": "/conformance/tests/level3.json"
+    }
+  ],
+  
+  "docs": [
+    {
+      "id": "spec",
+      "path": "/spec/",
+      "description": "Human-readable specification"
+    },
+    {
+      "id": "contract",
+      "path": "/spec/contract/",
+      "description": "Primary specification contract"
+    },
+    {
+      "id": "anchors",
+      "path": "/spec/anchors/",
+      "description": "Stable anchor registry"
+    }
+  ],
+  
+  "entrypoints": {
+    "manifest": "/.well-known/manifest.json",
+    "llms": "/.well-known/llms.txt",
+    "human": "/",
+    "machine": "/machine/"
+  }
+}

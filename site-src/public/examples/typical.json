@@ -1,0 +1,106 @@
+{
+  "$schema": "https://resurrectum.dev/schemas/v1/capsule.manifest.schema.json",
+  "_meta": {
+    "example_id": "typical",
+    "description": "Real-world capsule with multiple artifacts and common patterns",
+    "expected_valid": true,
+    "notes": "Demonstrates compression, access control, and typical artifact structure"
+  },
+  "manifest": {
+    "spec_version": "v1",
+    "schema_version": "1.0.0",
+    "capsule_id": "a1b2c3d4e5f67890abcdef1234567890abcdef1234567890abcdef1234567890/01923456-789a-7def-8012-3456789abcde",
+    "created_at": "2024-01-15T10:30:00Z",
+    "aead": "xchacha20-poly1305",
+    "kdf": {
+      "algorithm": "argon2id",
+      "salt": "dHlwaWNhbC1zYWx0LWV4YW1wbGU",
+      "memory_kb": 65536,
+      "iterations": 3,
+      "parallelism": 4
+    },
+    "artifacts": [
+      {
+        "path": "MEMORY.md",
+        "kind": "memory",
+        "mode": "private",
+        "plaintext_hash": "abc123...",
+        "size_bytes": 2048,
+        "blob_id": "archive_blob_001"
+      },
+      {
+        "path": "SOUL.md",
+        "kind": "persona",
+        "mode": "private",
+        "plaintext_hash": "def456...",
+        "size_bytes": 512,
+        "blob_id": "archive_blob_001"
+      },
+      {
+        "path": "memory/notes.md",
+        "kind": "memory",
+        "mode": "private",
+        "plaintext_hash": "ghi789...",
+        "size_bytes": 4096,
+        "blob_id": "archive_blob_001"
+      },
+      {
+        "path": "memory/moltbook.json",
+        "kind": "memory",
+        "mode": "private",
+        "plaintext_hash": "jkl012...",
+        "size_bytes": 8192,
+        "blob_id": "archive_blob_001"
+      },
+      {
+        "path": ".cursor/rules/project.md",
+        "kind": "config",
+        "mode": "private",
+        "plaintext_hash": "mno345...",
+        "size_bytes": 1024,
+        "blob_id": "archive_blob_001"
+      },
+      {
+        "path": "projects/demo/STATUS.md",
+        "kind": "state",
+        "mode": "private",
+        "plaintext_hash": "pqr678...",
+        "size_bytes": 256,
+        "blob_id": "archive_blob_001"
+      }
+    ],
+    "blobs": [
+      {
+        "blob_id": "archive_blob_001",
+        "ciphertext_hash": "compressed_archive_hash...",
+        "ciphertext_size_bytes": 4352,
+        "nonce": "dHlwaWNhbC1ub25jZS0yNA",
+        "storage": {
+          "backend": "r2",
+          "ref": "r2://resurrectum-capsules/a1b2c3d4.../blobs/archive_blob_001"
+        },
+        "is_archive": true,
+        "archive_format": "7z"
+      }
+    ],
+    "access": {
+      "owner": "ed25519:a1b2c3d4e5f67890abcdef1234567890abcdef1234567890abcdef1234567890",
+      "readers": [],
+      "public": false
+    },
+    "compression": {
+      "enabled": true,
+      "algorithm": "7z",
+      "level": 9,
+      "original_size_bytes": 16128,
+      "compressed_size_bytes": 4096,
+      "compression_ratio": 0.254
+    },
+    "signature": {
+      "algorithm": "ed25519",
+      "public_key": "dHlwaWNhbC1wdWJsaWMta2V5",
+      "signature": "dHlwaWNhbC1zaWduYXR1cmU",
+      "signed_at": "2024-01-15T10:30:05Z"
+    }
+  }
+}

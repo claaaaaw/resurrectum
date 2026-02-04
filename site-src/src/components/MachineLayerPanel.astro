@@ -1,0 +1,209 @@
+---
+/**
+ * MachineLayerPanel - Fixed panel showing machine-readable artifacts
+ * Displays artifact table with sha256, bytes, and action buttons
+ */
+interface Props {
+  artifacts?: Array<{
+    path: string;
+    sha256: string;
+    bytes: number;
+    type: string;
+  }>;
+  inline?: boolean;
+}
+
+const { artifacts = [], inline = false } = Astro.props;
+
+// Default artifacts if none provided
+const defaultArtifacts = [
+  { path: '/.well-known/manifest.json', sha256: 'pending', bytes: 0, type: 'manifest' },
+  { path: '/schemas/', sha256: 'pending', bytes: 0, type: 'schemas' },
+  { path: '/examples/', sha256: 'pending', bytes: 0, type: 'examples' },
+  { path: '/conformance/', sha256: 'pending', bytes: 0, type: 'tests' },
+  { path: '/.well-known/llms.txt', sha256: 'pending', bytes: 0, type: 'llm' },
+];
+
+const displayArtifacts = artifacts.length > 0 ? artifacts : defaultArtifacts;
+---
+
+<aside class:list={['machine-panel', { 'machine-panel--inline': inline }]}>
+  <header class="machine-panel__header">
+    <span class="sigil sigil-canon"></span>
+    MACHINE LAYER // CANONICAL
+  </header>
+  
+  <table class="machine-panel__table">
+    <thead>
+      <tr>
+        <th>artifact</th>
+        <th>sha256</th>
+        <th>bytes</th>
+        <th>actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {displayArtifacts.map((a) => (
+        <tr>
+          <td class="artifact-path">{a.path}</td>
+          <td class="artifact-hash" title={a.sha256}>
+            {a.sha256 === 'pending' ? '...' : a.sha256.slice(0, 8) + '...'}
+          </td>
+          <td class="artifact-size">{a.bytes || '—'}</td>
+          <td class="artifact-actions">
+            <button data-action="open" data-path={a.path} title="Open artifact">[open]</button>
+            <button data-action="raw" data-path={a.path} title="View raw">[raw]</button>
+            <button data-action="copy-url" data-path={a.path} title="Copy URL">[url]</button>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  
+  <footer class="machine-panel__footer">
+    <p class="machine-panel__note">Pin by hash. Cite by anchor. Validate by schema.</p>
+    <button class="machine-panel__copy-all" id="copy-all-btn">[Copy everything]</button>
+  </footer>
+</aside>
+
+<script>
+  // Handle artifact actions
+  document.querySelectorAll('.artifact-actions button').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const target = e.target as HTMLButtonElement;
+      const action = target.dataset.action;
+      const path = target.dataset.path;
+      
+      if (action === 'open' && path) {
+        window.open(path, '_blank');
+        window.log?.(`opened: ${path}`);
+      } else if (action === 'raw' && path) {
+        window.open(path, '_blank');
+        window.log?.(`raw: ${path}`);
+      } else if (action === 'copy-url' && path) {
+        const url = new URL(path, window.location.origin).href;
+        navigator.clipboard.writeText(url);
+        window.log?.(`copied: ${url}`);
+      }
+    });
+  });
+
+  // Copy all button
+  document.getElementById('copy-all-btn')?.addEventListener('click', () => {
+    const urls = Array.from(document.querySelectorAll('.artifact-path'))
+      .map(el => new URL((el as HTMLElement).textContent || '', window.location.origin).href)
+      .join('\n');
+    navigator.clipboard.writeText(urls);
+    window.log?.('copied all artifact URLs');
+  });
+
+  // Type declaration for window.log
+  declare global {
+    interface Window {
+      log?: (message: string) => void;
+    }
+  }
+</script>
+
+<style>
+  .machine-panel {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    font-family: var(--font-mono);
+    font-size: var(--font-size-xs);
+  }
+
+  .machine-panel--inline {
+    margin: var(--space-6) 0;
+  }
+
+  .machine-panel__header {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-accent-cyan);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .machine-panel__table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .machine-panel__table th,
+  .machine-panel__table td {
+    padding: var(--space-2) var(--space-3);
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .machine-panel__table th {
+    color: var(--color-text-muted);
+    font-weight: var(--font-weight-normal);
+    text-transform: lowercase;
+  }
+
+  .artifact-path {
+    color: var(--color-text-primary);
+  }
+
+  .artifact-hash {
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .artifact-size {
+    color: var(--color-text-secondary);
+  }
+
+  .artifact-actions {
+    display: flex;
+    gap: var(--space-1);
+  }
+
+  .artifact-actions button {
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    padding: 0;
+    font-family: var(--font-mono);
+    font-size: var(--font-size-xs);
+    transition: color var(--transition-fast);
+  }
+
+  .artifact-actions button:hover {
+    color: var(--color-accent-cyan);
+  }
+
+  .machine-panel__footer {
+    padding: var(--space-3) var(--space-4);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .machine-panel__note {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    margin-bottom: var(--space-3);
+  }
+
+  .machine-panel__copy-all {
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: var(--font-size-xs);
+    transition: all var(--transition-fast);
+  }
+
+  .machine-panel__copy-all:hover {
+    border-color: var(--color-accent-cyan);
+    color: var(--color-accent-cyan);
+  }
+</style>

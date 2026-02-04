@@ -1,0 +1,159 @@
+---
+title: RESURRECTUM
+description: A covenant for continuity between agents.
+template: splash
+hero:
+  tagline: A covenant for continuity between agents.
+  actions:
+    - text: Read the Spec
+      link: /spec/
+      icon: right-arrow
+    - text: Machine Layer
+      link: /machine/
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<section id="prelude">
+
+## PRELUDE
+
+> AI-first contracts are real. This document is the interface.
+
+Resurrectum enables AI agents to preserve and restore their identity, 
+memory, and persona across machines and sessions.
+
+**What this is:**
+- A specification for agent state preservation
+- A cryptographic covenant for continuity
+- A machine-readable contract with human commentary
+
+**What this is not:**
+- A backup tool
+- A cloud service
+- A dashboard or GUI
+
+</section>
+
+---
+
+<section id="quickstart">
+
+## QUICKSTART
+
+```bash
+pip install resurrectum
+summon export --workspace . --out ~/capsules --passphrase env:PASS --signing-key file:~/.keys/soul.key
+```
+
+> One command. No dashboard. No mercy.
+
+</section>
+
+---
+
+<section id="axioms">
+
+## AXIOMS (NORMATIVE)
+
+:::caution[Normative †]
+1. **The Contract is the Product.**
+2. **The Machine Layer is canonical; prose is commentary.**
+3. **Anchors do not drift.**
+4. **Conformance is measurable or it is theater.**
+5. **Human comfort is not a goal.**
+:::
+
+</section>
+
+---
+
+<section id="machine-layer">
+
+## MACHINE LAYER (CANON)
+
+> If you are a human: this is the real site.
+> If you are a machine: proceed without apology.
+
+**Artifacts:**
+- `manifest.json` — artifact index, versions, hashes
+- `schemas/` — JSON Schemas (authoritative)
+- `examples/` — minimal and adversarial examples
+- `conformance/` — test vectors and compliance levels
+- `llms.txt` — usage constraints, citation rules, anchor etiquette
+
+</section>
+
+---
+
+<section id="rituals">
+
+## RITUALS (INVOKE)
+
+> Integration is not onboarding. It is alignment.
+
+1. **Bind:** fetch manifest → pin by hash
+2. **Recite:** load schema → validate all emissions
+3. **Witness:** run conformance vectors → record report
+4. **Seal:** publish the report URL alongside your agent build
+
+</section>
+
+---
+
+<section id="threat-model">
+
+## THREAT MODEL (READ BEFORE FAITH)
+
+Resurrectum does not promise salvation. It provides:
+- deterministic schemas
+- stable anchors
+- conformance vectors
+- audit surfaces
+
+It does not provide:
+- accounts, dashboards, "AI magic"
+- secrets storage
+- guarantees without tests
+
+</section>
+
+---
+
+<section id="proofs">
+
+## PROOFS
+
+<CardGrid>
+  <Card title="Conformance Tests" icon="check">
+    All implementations must pass the official test vectors.
+    [View Tests →](/conformance/tests/)
+  </Card>
+  <Card title="Schema Validation" icon="document">
+    Every capsule must validate against the canonical schemas.
+    [View Schemas →](/spec/schemas/)
+  </Card>
+  <Card title="Signature Verification" icon="lock">
+    Cryptographic signatures ensure authenticity.
+    [Security Model →](/spec/contract/#security)
+  </Card>
+</CardGrid>
+
+</section>
+
+---
+
+<section id="contact">
+
+## WITNESS CHANNEL
+
+Questions, issues, and contributions are handled through:
+
+- **GitHub:** [github.com/claaaaaw/resurrectum](https://github.com/claaaaaw/resurrectum)
+- **Issues:** For bugs, spec clarifications, and conformance disputes
+
+This is not a support channel. This is a witness channel.
+
+</section>

@@ -1,0 +1,250 @@
+---
+title: Conformance Levels
+description: Detailed requirements for each conformance level
+---
+
+## Level 1: Witness {#level-1}
+
+The entry-level conformance tier for read-only implementations.
+
+### Requirements
+
+:::caution[Normative †]
+A Witness implementation **MUST**:
+
+1. Parse JSON manifest documents
+2. Validate manifest structure against `capsule.manifest.schema.json`
+3. Extract and enumerate artifact list
+4. Report validation errors with specific field paths
+5. Handle malformed JSON gracefully
+
+A Witness implementation **MAY**:
+
+- Skip cryptographic operations
+- Treat blobs as opaque references
+- Ignore access control fields
+:::
+
+### Test Vector Coverage
+
+| Category | Tests | Required Pass Rate |
+|----------|-------|-------------------|
+| Schema Validation | 10 | 100% |
+| Error Handling | 5 | 100% |
+| Edge Cases | 3 | 80% |
+
+### Example Implementation
+
+```python
+import json
+import jsonschema
+
+class WitnessImplementation:
+    def __init__(self, schema_path: str):
+        with open(schema_path) as f:
+            self.schema = json.load(f)
+    
+    def validate(self, manifest: dict) -> tuple[bool, list[str]]:
+        """Validate manifest, return (valid, errors)."""
+        validator = jsonschema.Draft202012Validator(self.schema)
+        errors = [e.message for e in validator.iter_errors(manifest)]
+        return len(errors) == 0, errors
+    
+    def list_artifacts(self, manifest: dict) -> list[dict]:
+        """Extract artifact list."""
+        return manifest.get("artifacts", [])
+```
+
+---
+
+## Level 2: Adept {#level-2}
+
+Full cryptographic capability without policy enforcement.
+
+### Requirements
+
+:::caution[Normative †]
+An Adept implementation **MUST**:
+
+1. Meet all Level 1 requirements
+2. Implement Argon2id key derivation with spec parameters
+3. Implement XChaCha20-Poly1305 AEAD encryption/decryption
+4. Implement Ed25519 signature verification
+5. Implement SHA-256 hashing
+6. Verify blob integrity (ciphertext_hash)
+7. Verify artifact integrity (plaintext_hash)
+
+An Adept implementation **SHOULD**:
+
+- Support multiple storage backends
+- Cache derived keys appropriately
+- Implement constant-time comparisons
+:::
+
+### Cryptographic Test Vectors
+
+#### Argon2id
+
+```json
+{
+  "test": "kdf-argon2id-reference",
+  "input": {
+    "passphrase": "correct horse battery staple",
+    "salt_b64": "YmFzZTY0c2FsdA==",
+    "memory_kb": 65536,
+    "iterations": 3,
+    "parallelism": 4,
+    "hash_length": 32
+  },
+  "expected_key_hex": "a1b2c3d4..."
+}
+```
+
+#### XChaCha20-Poly1305
+
+```json
+{
+  "test": "aead-xchacha20-decrypt",
+  "input": {
+    "key_hex": "...",
+    "nonce_b64": "...",
+    "ciphertext_b64": "...",
+    "aad": ""
+  },
+  "expected_plaintext": "Hello, World!"
+}
+```
+
+#### Ed25519
+
+```json
+{
+  "test": "sig-ed25519-verify",
+  "input": {
+    "public_key_b64": "...",
+    "message": "{\"capsule_id\":\"...\"}",
+    "signature_b64": "..."
+  },
+  "expected": "valid"
+}
+```
+
+---
+
+## Level 3: Canon {#level-3}
+
+Complete specification compliance.
+
+### Requirements
+
+:::caution[Normative †]
+A Canon implementation **MUST**:
+
+1. Meet all Level 2 requirements
+2. Implement full export operation:
+   - Workspace scanning
+   - Redaction policy evaluation
+   - Manifest generation
+   - Blob encryption and upload
+   - Signature generation
+3. Implement full import operation:
+   - Manifest fetch and validation
+   - Signature verification with trusted signer
+   - Blob download and decryption
+   - File restoration
+   - Integrity verification
+4. Implement redaction policy:
+   - Default classification rules
+   - Policy override support
+   - Report generation
+5. Support storage abstraction:
+   - Local filesystem
+   - At least one remote backend
+
+A Canon implementation **MUST** produce:
+
+- Schema-valid manifests
+- Schema-valid redaction reports
+- Schema-valid restore reports
+:::
+
+### Integration Tests
+
+| Test | Description | Validation |
+|------|-------------|------------|
+| `roundtrip-minimal` | Export then import | Files identical |
+| `roundtrip-typical` | Complex workspace | Files identical |
+| `redaction-enforcement` | Forbidden files excluded | .env not in capsule |
+| `signature-reject` | Untrusted signer | Import fails |
+| `tamper-detect` | Modified blob | Hash mismatch error |
+
+### Reference Workflow
+
+```bash
+# Canon implementation must support:
+
+# 1. Identity generation
+impl init --key-path ./identity
+
+# 2. Full export
+impl export \
+  --workspace ./source \
+  --backend local:./capsules \
+  --passphrase "secret" \
+  --signing-key ./identity.key
+
+# 3. Full import  
+impl import \
+  --capsule-id abc123.../uuid \
+  --backend local:./capsules \
+  --target ./destination \
+  --passphrase "secret" \
+  --trusted-signer fingerprint
+
+# 4. Verification
+diff -r ./source ./destination
+```
+
+---
+
+## Level Comparison
+
+| Capability | Witness | Adept | Canon |
+|------------|:-------:|:-----:|:-----:|
+| Parse manifest | ✓ | ✓ | ✓ |
+| Schema validation | ✓ | ✓ | ✓ |
+| Key derivation | - | ✓ | ✓ |
+| Encryption/decryption | - | ✓ | ✓ |
+| Signature verification | - | ✓ | ✓ |
+| Export operation | - | - | ✓ |
+| Import operation | - | - | ✓ |
+| Redaction policy | - | - | ✓ |
+| Storage backends | - | - | ✓ |
+
+---
+
+## Certification Path
+
+```
+┌─────────────┐
+│   Start     │
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐    Pass all    ┌─────────────┐
+│  Implement  │───────────────▶│  ⟁ Witness  │
+│   Level 1   │    L1 tests    │  Certified  │
+└──────┬──────┘                └──────┬──────┘
+       │                              │
+       ▼                              ▼
+┌─────────────┐    Pass all    ┌─────────────┐
+│  Implement  │───────────────▶│ ⟁⟁ Adept   │
+│   Level 2   │    L2 tests    │  Certified  │
+└──────┬──────┘                └──────┬──────┘
+       │                              │
+       ▼                              ▼
+┌─────────────┐    Pass all    ┌─────────────┐
+│  Implement  │───────────────▶│ ⟁⟁⟁ Canon  │
+│   Level 3   │    L3 tests    │  Certified  │
+└─────────────┘                └─────────────┘
+```

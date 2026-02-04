@@ -1,0 +1,68 @@
+---
+/**
+ * CopyButton - Universal copy to clipboard button
+ */
+interface Props {
+  text: string;
+  label?: string;
+  class?: string;
+}
+
+const { text, label = '[copy]', class: className = '' } = Astro.props;
+---
+
+<button 
+  class={`copy-button ${className}`}
+  data-copy-text={text}
+  title="Copy to clipboard"
+>
+  {label}
+</button>
+
+<script>
+  document.querySelectorAll('.copy-button').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const target = e.target as HTMLButtonElement;
+      const text = target.dataset.copyText;
+      if (text) {
+        try {
+          await navigator.clipboard.writeText(text);
+          const originalText = target.textContent;
+          target.textContent = '[copied]';
+          target.classList.add('copy-button--success');
+          
+          setTimeout(() => {
+            target.textContent = originalText;
+            target.classList.remove('copy-button--success');
+          }, 1500);
+          
+          window.log?.(`copied: ${text.slice(0, 50)}${text.length > 50 ? '...' : ''}`);
+        } catch (err) {
+          console.error('Copy failed:', err);
+          window.log?.('copy failed');
+        }
+      }
+    });
+  });
+</script>
+
+<style>
+  .copy-button {
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    padding: 0;
+    font-family: var(--font-mono);
+    font-size: var(--font-size-xs);
+    transition: color var(--transition-fast);
+  }
+
+  .copy-button:hover {
+    color: var(--color-accent-cyan);
+  }
+
+  .copy-button--success {
+    color: var(--color-accent-green) !important;
+  }
+</style>

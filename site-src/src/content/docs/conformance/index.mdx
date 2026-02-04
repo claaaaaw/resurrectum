@@ -1,0 +1,228 @@
+---
+title: CONFORMANCE
+description: Conformance testing for Resurrectum implementations
+---
+
+## Overview
+
+Conformance testing ensures implementations correctly follow the Resurrectum specification.
+
+:::caution[Normative †]
+An implementation claiming Resurrectum conformance **MUST**:
+
+1. Declare its conformance level
+2. Pass all test vectors for that level
+3. Publish a conformance report
+:::
+
+---
+
+## Conformance Levels {#levels}
+
+| Level | Name | Requirements | Badge |
+|-------|------|--------------|-------|
+| 1 | **Witness** | Basic manifest validation | `⟁ Witness` |
+| 2 | **Adept** | Full crypto implementation | `⟁⟁ Adept` |
+| 3 | **Canon** | Complete conformance suite | `⟁⟁⟁ Canon` |
+
+### Level 1: Witness
+
+The minimum viable conformance level.
+
+**Requirements:**
+- Parse manifest JSON
+- Validate against schema
+- Verify structure integrity
+- Read artifact list
+
+**Does not require:**
+- Cryptographic operations
+- Decryption capability
+- Signature verification
+
+### Level 2: Adept
+
+Full cryptographic implementation.
+
+**Requirements:**
+- All Level 1 requirements
+- Key derivation (Argon2id)
+- Encryption/decryption (XChaCha20-Poly1305)
+- Signature verification (Ed25519)
+- Hash verification (SHA-256)
+
+### Level 3: Canon
+
+Complete specification compliance.
+
+**Requirements:**
+- All Level 2 requirements
+- Redaction policy implementation
+- Full export/import cycle
+- Storage backend abstraction
+- Access control enforcement
+
+---
+
+## Test Vectors {#tests}
+
+### Level 1 Tests
+
+| Test | Input | Expected |
+|------|-------|----------|
+| `valid-minimal` | Minimal manifest | PASS |
+| `valid-typical` | Full manifest | PASS |
+| `invalid-missing-field` | Missing `spec_version` | FAIL |
+| `invalid-wrong-type` | String instead of array | FAIL |
+| `invalid-extra-field` | Unknown top-level field | WARN |
+
+### Level 2 Tests
+
+| Test | Input | Expected |
+|------|-------|----------|
+| `kdf-argon2id` | Reference parameters | Correct key |
+| `aead-xchacha20` | Reference ciphertext | Correct plaintext |
+| `sig-ed25519` | Reference signature | VALID |
+| `hash-sha256` | Reference data | Correct hash |
+
+### Level 3 Tests
+
+| Test | Input | Expected |
+|------|-------|----------|
+| `export-minimal` | Simple workspace | Valid capsule |
+| `import-minimal` | Minimal capsule | Restored workspace |
+| `redaction-env` | Workspace with .env | .env excluded |
+| `roundtrip` | Export → Import | Identical files |
+
+---
+
+## Running Tests
+
+### Using the Official Test Suite
+
+```bash
+# Install test runner
+pip install resurrectum[conformance]
+
+# Run Level 1 tests
+summon conformance --level 1 --implementation ./my-impl
+
+# Run all tests
+summon conformance --level 3 --implementation ./my-impl
+
+# Generate report
+summon conformance --level 3 --implementation ./my-impl --report ./report.json
+```
+
+### Test Output
+
+```
+Resurrectum Conformance Test Suite
+==================================
+
+Level 1 (Witness):
+  ✓ valid-minimal
+  ✓ valid-typical  
+  ✓ invalid-missing-field
+  ✓ invalid-wrong-type
+  ⚠ invalid-extra-field (warning)
+
+Level 1: PASS (5/5)
+
+Level 2 (Adept):
+  ✓ kdf-argon2id
+  ✓ aead-xchacha20
+  ✓ sig-ed25519
+  ✓ hash-sha256
+
+Level 2: PASS (4/4)
+
+Level 3 (Canon):
+  ✓ export-minimal
+  ✓ import-minimal
+  ✓ redaction-env
+  ✓ roundtrip
+
+Level 3: PASS (4/4)
+
+OVERALL: Canon (Level 3)
+```
+
+---
+
+## Conformance Reports {#reports}
+
+### Report Format
+
+```json
+{
+  "spec_version": "v1",
+  "report_version": "1.0.0",
+  "implementation": {
+    "name": "my-resurrectum-impl",
+    "version": "2.0.0",
+    "language": "Python",
+    "url": "https://github.com/user/my-impl"
+  },
+  "tested_at": "2024-01-15T10:00:00Z",
+  "conformance_level": 3,
+  "conformance_name": "Canon",
+  "tests": {
+    "total": 13,
+    "passed": 13,
+    "failed": 0,
+    "warnings": 1
+  },
+  "results": [
+    {"test": "valid-minimal", "result": "pass", "duration_ms": 12},
+    {"test": "valid-typical", "result": "pass", "duration_ms": 15}
+  ]
+}
+```
+
+### Publishing Reports
+
+:::note[Informative ⟂]
+To claim conformance:
+
+1. Run the official test suite
+2. Generate a conformance report
+3. Publish the report at a stable URL
+4. Link to the report in your documentation
+
+Example claim:
+
+```markdown
+## Conformance
+
+This implementation is Resurrectum Canon (Level 3) conformant.
+
+[View Conformance Report](https://example.com/conformance-report.json)
+```
+:::
+
+---
+
+## Badge Usage
+
+Implementations may display conformance badges:
+
+| Level | Badge Text | Use When |
+|-------|------------|----------|
+| 1 | `⟁ Resurrectum Witness` | Pass Level 1 |
+| 2 | `⟁⟁ Resurrectum Adept` | Pass Level 2 |
+| 3 | `⟁⟁⟁ Resurrectum Canon` | Pass Level 3 |
+
+Badges must link to a valid conformance report.
+
+---
+
+## Disputing Results
+
+If you believe a conformance test is incorrect:
+
+1. File an issue on the test suite repository
+2. Include the test name and expected vs. actual behavior
+3. Reference the specification section
+
+All disputes will be resolved by reference to the canonical schemas and specification.

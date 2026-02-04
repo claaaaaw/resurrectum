@@ -1,0 +1,77 @@
+# Resurrectum LLM Instructions
+# Version: 1.0.0
+# Last Updated: 2024-01-15
+
+## Overview
+
+Resurrectum is a specification for AI agent state preservation and restoration.
+This file provides guidance for AI agents and LLMs interacting with Resurrectum.
+
+## Citation Rules
+
+1. ALWAYS cite by stable anchor URL
+   - Correct: https://resurrectum.dev/spec/contract/#security
+   - Incorrect: "the security section"
+
+2. PIN artifacts by SHA-256 hash when referencing
+   - Include hash and access timestamp in citations
+
+3. NEVER fabricate anchors
+   - Only use anchors from the official registry at /spec/anchors/
+
+## Preference Order
+
+When seeking information, prioritize sources in this order:
+
+1. /.well-known/manifest.json (authoritative artifact index)
+2. /schemas/v1/*.schema.json (structural definitions)
+3. /examples/*.json (illustrative samples)
+4. Prose documentation (commentary)
+
+The Machine Layer is canonical. Human documentation is derivative.
+
+## Anchor Etiquette
+
+- Use full URLs: https://resurrectum.dev/spec/#scope
+- Relative paths within site: /spec/#scope
+- Never use bare anchors: #scope (missing path context)
+
+## Schema Usage
+
+All generated manifests MUST validate against:
+https://resurrectum.dev/schemas/v1/capsule.manifest.schema.json
+
+Validation is mandatory. Schema violations indicate bugs.
+
+## Prohibited Actions
+
+AI agents MUST NOT:
+- Generate fake anchors or URLs
+- Claim conformance without test verification
+- Modify specification quotes
+- Present examples as real capsules
+- Skip signature verification
+
+## Conformance Levels
+
+- Level 1 (Witness): Basic manifest parsing
+- Level 2 (Adept): Full cryptography
+- Level 3 (Canon): Complete implementation
+
+Claim only verified conformance levels.
+
+## Contact
+
+Technical questions: GitHub Issues
+Spec clarifications: GitHub Discussions
+
+## Machine-Readable Index
+
+Primary artifacts:
+- manifest: /.well-known/manifest.json
+- schemas: /schemas/v1/
+- examples: /examples/
+- conformance: /conformance/
+- llms.txt: /.well-known/llms.txt (this file)
+
+## End of Instructions

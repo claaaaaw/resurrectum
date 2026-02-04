@@ -1,0 +1,322 @@
+---
+title: Test Vectors
+description: Official conformance test vectors
+---
+
+## Overview
+
+This page documents the official test vectors used for conformance testing.
+
+:::caution[Normative †]
+Test vectors are normative. Implementations **MUST** produce identical outputs for identical inputs.
+:::
+
+---
+
+## Test Vector Format
+
+Each test vector is a JSON object:
+
+```json
+{
+  "id": "test-unique-id",
+  "level": 1,
+  "category": "schema-validation",
+  "description": "Human-readable description",
+  "input": { ... },
+  "expected": { ... },
+  "notes": "Optional implementation notes"
+}
+```
+
+---
+
+## Level 1: Schema Validation
+
+### valid-minimal
+
+```json
+{
+  "id": "valid-minimal",
+  "level": 1,
+  "category": "schema-validation",
+  "description": "Minimum valid manifest passes validation",
+  "input": {
+    "manifest": {
+      "spec_version": "v1",
+      "schema_version": "1.0.0",
+      "capsule_id": "abc123.../550e8400-e29b-41d4-a716-446655440000",
+      "created_at": "2024-01-15T10:00:00Z",
+      "aead": "xchacha20-poly1305",
+      "kdf": {
+        "algorithm": "argon2id",
+        "salt": "c2FsdA",
+        "memory_kb": 65536,
+        "iterations": 3,
+        "parallelism": 4
+      },
+      "artifacts": [],
+      "blobs": [],
+      "signature": {
+        "algorithm": "ed25519",
+        "public_key": "cHVibGljX2tleQ",
+        "signature": "c2lnbmF0dXJl",
+        "signed_at": "2024-01-15T10:00:01Z"
+      }
+    }
+  },
+  "expected": {
+    "valid": true,
+    "errors": []
+  }
+}
+```
+
+### invalid-missing-spec-version
+
+```json
+{
+  "id": "invalid-missing-spec-version",
+  "level": 1,
+  "category": "schema-validation",
+  "description": "Manifest without spec_version fails validation",
+  "input": {
+    "manifest": {
+      "schema_version": "1.0.0",
+      "capsule_id": "abc123.../uuid",
+      "created_at": "2024-01-15T10:00:00Z"
+    }
+  },
+  "expected": {
+    "valid": false,
+    "errors": ["'spec_version' is a required property"]
+  }
+}
+```
+
+### invalid-wrong-type
+
+```json
+{
+  "id": "invalid-wrong-type",
+  "level": 1,
+  "category": "schema-validation",
+  "description": "Artifacts must be array, not object",
+  "input": {
+    "manifest": {
+      "spec_version": "v1",
+      "schema_version": "1.0.0",
+      "capsule_id": "abc123.../uuid",
+      "created_at": "2024-01-15T10:00:00Z",
+      "artifacts": {},
+      "blobs": [],
+      "signature": {}
+    }
+  },
+  "expected": {
+    "valid": false,
+    "errors": ["{} is not of type 'array'"]
+  }
+}
+```
+
+---
+
+## Level 2: Cryptographic Operations
+
+### kdf-argon2id-basic
+
+```json
+{
+  "id": "kdf-argon2id-basic",
+  "level": 2,
+  "category": "key-derivation",
+  "description": "Basic Argon2id derivation",
+  "input": {
+    "passphrase": "test-passphrase",
+    "salt_hex": "0102030405060708090a0b0c0d0e0f10",
+    "memory_kb": 65536,
+    "iterations": 3,
+    "parallelism": 4,
+    "hash_length": 32
+  },
+  "expected": {
+    "key_hex": "f49d58e0e9c3a8c7b6e5d4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3"
+  },
+  "notes": "Actual expected value depends on Argon2id reference implementation"
+}
+```
+
+### aead-encrypt-decrypt
+
+```json
+{
+  "id": "aead-encrypt-decrypt",
+  "level": 2,
+  "category": "encryption",
+  "description": "XChaCha20-Poly1305 round trip",
+  "input": {
+    "key_hex": "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20",
+    "plaintext": "Hello, World!",
+    "aad": ""
+  },
+  "expected": {
+    "operation": "encrypt-then-decrypt",
+    "result": "Hello, World!"
+  },
+  "notes": "Nonce is randomly generated; test verifies round-trip correctness"
+}
+```
+
+### sig-verify-valid
+
+```json
+{
+  "id": "sig-verify-valid",
+  "level": 2,
+  "category": "signature",
+  "description": "Valid Ed25519 signature verification",
+  "input": {
+    "public_key_hex": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+    "message_hex": "68656c6c6f",
+    "signature_hex": "..."
+  },
+  "expected": {
+    "valid": true
+  }
+}
+```
+
+### sig-verify-invalid
+
+```json
+{
+  "id": "sig-verify-invalid",
+  "level": 2,
+  "category": "signature",
+  "description": "Invalid signature rejected",
+  "input": {
+    "public_key_hex": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+    "message_hex": "68656c6c6f",
+    "signature_hex": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "expected": {
+    "valid": false
+  }
+}
+```
+
+### hash-sha256
+
+```json
+{
+  "id": "hash-sha256",
+  "level": 2,
+  "category": "hashing",
+  "description": "SHA-256 hash computation",
+  "input": {
+    "data_hex": "68656c6c6f"
+  },
+  "expected": {
+    "hash_hex": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
+  }
+}
+```
+
+---
+
+## Level 3: Integration Tests
+
+### export-minimal
+
+```json
+{
+  "id": "export-minimal",
+  "level": 3,
+  "category": "integration",
+  "description": "Export minimal workspace produces valid capsule",
+  "input": {
+    "workspace": {
+      "MEMORY.md": "# Memory\n\nSome notes."
+    },
+    "passphrase": "test-passphrase",
+    "signing_key": "..."
+  },
+  "expected": {
+    "manifest_valid": true,
+    "artifact_count": 1,
+    "blob_count": 1
+  }
+}
+```
+
+### redaction-env-excluded
+
+```json
+{
+  "id": "redaction-env-excluded",
+  "level": 3,
+  "category": "redaction",
+  "description": ".env files are classified as forbidden and excluded",
+  "input": {
+    "workspace": {
+      "MEMORY.md": "Notes",
+      ".env": "SECRET_KEY=abc123"
+    }
+  },
+  "expected": {
+    "redaction_report": {
+      "decisions": [
+        {"path": "MEMORY.md", "class": "private", "decision": "include"},
+        {"path": ".env", "class": "forbidden", "decision": "exclude"}
+      ]
+    }
+  }
+}
+```
+
+### roundtrip-integrity
+
+```json
+{
+  "id": "roundtrip-integrity",
+  "level": 3,
+  "category": "integration",
+  "description": "Export-import produces identical files",
+  "input": {
+    "workspace": {
+      "MEMORY.md": "Content A",
+      "memory/notes.md": "Content B",
+      "SOUL.md": "Content C"
+    },
+    "passphrase": "test"
+  },
+  "expected": {
+    "restored_files_match": true,
+    "file_count": 3
+  }
+}
+```
+
+---
+
+## Running Test Vectors
+
+```bash
+# Download test vectors
+curl -O https://resurrectum.dev/conformance/tests/all.json
+
+# Run with reference implementation
+summon conformance run --vectors all.json --output results.json
+
+# Validate results
+summon conformance verify --results results.json
+```
+
+:::note[Informative ⟂]
+Test vector files are available at:
+- `/conformance/tests/level1.json`
+- `/conformance/tests/level2.json`
+- `/conformance/tests/level3.json`
+- `/conformance/tests/all.json`
+:::

@@ -1,0 +1,86 @@
+---
+/**
+ * LogLine - Bottom status bar showing system messages
+ * Replaces toast notifications with a terminal-style log line
+ */
+interface Props {
+  initialMessage?: string;
+}
+
+const { initialMessage = 'ready' } = Astro.props;
+---
+
+<div class="log-line" id="log-line">
+  <span class="log-prefix">LOG:</span>
+  <span class="log-message" id="log-message">{initialMessage}</span>
+  <span class="log-timestamp" id="log-timestamp"></span>
+</div>
+
+<script>
+  // Global log function
+  interface Window {
+    log: (message: string) => void;
+  }
+
+  const logMessage = document.getElementById('log-message');
+  const logTimestamp = document.getElementById('log-timestamp');
+
+  window.log = (message: string) => {
+    if (logMessage) {
+      logMessage.textContent = message;
+      logMessage.classList.add('log-flash');
+      setTimeout(() => logMessage.classList.remove('log-flash'), 300);
+    }
+    if (logTimestamp) {
+      const now = new Date();
+      logTimestamp.textContent = `[${now.toLocaleTimeString()}]`;
+    }
+  };
+
+  // Show timestamp on load
+  if (logTimestamp) {
+    const now = new Date();
+    logTimestamp.textContent = `[${now.toLocaleTimeString()}]`;
+  }
+</script>
+
+<style>
+  .log-line {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--space-2) var(--space-4);
+    background: var(--color-bg-secondary);
+    border-top: 1px solid var(--color-border);
+    font-family: var(--font-mono);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .log-prefix {
+    color: var(--color-accent-green);
+  }
+
+  .log-message {
+    flex: 1;
+    transition: color var(--transition-fast);
+  }
+
+  .log-message.log-flash {
+    color: var(--color-text-primary);
+  }
+
+  .log-timestamp {
+    color: var(--color-text-disabled);
+  }
+
+  /* Ensure content doesn't get hidden behind log line */
+  :global(body) {
+    padding-bottom: 40px;
+  }
+</style>

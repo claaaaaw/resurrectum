@@ -1,0 +1,133 @@
+---
+/**
+ * NormativeBlock - Highlighted block for RFC-style normative content
+ * Highlights MUST/SHALL/MAY keywords
+ */
+interface Props {
+  type: 'normative' | 'informative' | 'note' | 'warning';
+  title?: string;
+}
+
+const { type, title } = Astro.props;
+
+const typeLabels: Record<string, string> = {
+  normative: 'NORMATIVE',
+  informative: 'INFORMATIVE',
+  note: 'NOTE',
+  warning: 'WARNING',
+};
+
+const sigils: Record<string, string> = {
+  normative: '†',
+  informative: '⟂',
+  note: '※',
+  warning: '⚠',
+};
+---
+
+<div class={`normative-block normative-block--${type}`}>
+  {(title || typeLabels[type]) && (
+    <div class="normative-block__header">
+      <span class="normative-block__sigil">{sigils[type]}</span>
+      <span class="normative-block__label">{title || typeLabels[type]}</span>
+    </div>
+  )}
+  <div class="normative-block__content">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .normative-block {
+    padding: var(--space-4);
+    margin: var(--space-4) 0;
+    border-left: 2px solid var(--color-border);
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+  }
+
+  .normative-block--normative {
+    border-color: var(--color-normative);
+    background: rgba(110, 231, 255, 0.05);
+  }
+
+  .normative-block--informative {
+    border-color: var(--color-informative);
+    background: rgba(139, 146, 154, 0.05);
+  }
+
+  .normative-block--note {
+    border-color: var(--color-accent-yellow);
+    background: rgba(255, 216, 102, 0.05);
+  }
+
+  .normative-block--warning {
+    border-color: var(--color-accent-red);
+    background: rgba(255, 107, 107, 0.05);
+  }
+
+  .normative-block__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .normative-block__sigil {
+    font-size: var(--font-size-base);
+  }
+
+  .normative-block--normative .normative-block__sigil {
+    color: var(--color-normative);
+  }
+
+  .normative-block--informative .normative-block__sigil {
+    color: var(--color-informative);
+  }
+
+  .normative-block--note .normative-block__sigil {
+    color: var(--color-accent-yellow);
+  }
+
+  .normative-block--warning .normative-block__sigil {
+    color: var(--color-accent-red);
+  }
+
+  .normative-block__label {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+  }
+
+  .normative-block__content {
+    color: var(--color-text-primary);
+    line-height: var(--line-height-normal);
+  }
+
+  /* RFC keyword highlighting */
+  .normative-block__content :global(strong) {
+    color: var(--color-accent-cyan);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .normative-block__content :global(p) {
+    margin-bottom: var(--space-2);
+  }
+
+  .normative-block__content :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .normative-block__content :global(ol),
+  .normative-block__content :global(ul) {
+    margin: var(--space-2) 0;
+    padding-left: var(--space-6);
+  }
+
+  .normative-block__content :global(li) {
+    margin-bottom: var(--space-1);
+  }
+</style>

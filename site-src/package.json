@@ -1,0 +1,22 @@
+{
+  "name": "resurrectum-site",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Resurrectum - A covenant for continuity between agents",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "generate:manifest": "node scripts/generate-manifest.mjs"
+  },
+  "dependencies": {
+    "astro": "^4.0.0",
+    "@astrojs/starlight": "^0.20.0"
+  },
+  "devDependencies": {
+    "@fontsource/jetbrains-mono": "^5.0.0",
+    "sharp": "^0.33.0"
+  }
+}

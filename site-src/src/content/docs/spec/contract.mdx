@@ -1,0 +1,159 @@
+---
+title: Contract
+description: Primary specification contract for Resurrectum
+---
+
+## Contract Header {#contract-header}
+
+```
+Specification: Resurrectum Capsule Format
+Version:       1.0.0
+Status:        Draft
+Authors:       The Resurrectum Contributors
+```
+
+---
+
+## 1. Definitions {#definitions}
+
+:::caution[Normative Definitions †]
+**Capsule:** A self-contained, encrypted archive representing the preserved state of an AI agent or workspace.
+
+**Manifest:** A JSON document conforming to `capsule.manifest.schema.json` that describes the contents, integrity, and access control of a capsule.
+
+**Artifact:** A discrete unit of preserved data (file, memory, configuration) referenced within a manifest.
+
+**Blob:** Encrypted binary content stored separately from the manifest, identified by content hash.
+
+**Owner:** The cryptographic identity (Ed25519 public key fingerprint) with write access to a capsule.
+
+**Signer:** The identity that cryptographically signs the manifest, asserting authenticity.
+:::
+
+---
+
+## 2. Normative Requirements {#normative}
+
+### 2.1 Manifest Structure
+
+:::caution[Normative †]
+A valid manifest **MUST** include:
+
+1. `spec_version`: String, exactly `"v1"`
+2. `schema_version`: SemVer string, e.g., `"1.0.0"`
+3. `capsule_id`: String in format `{owner_fingerprint}/{uuid}`
+4. `created_at`: ISO 8601 timestamp
+5. `artifacts`: Array of artifact descriptors
+6. `blobs`: Array of blob references
+7. `signature`: Cryptographic signature object
+:::
+
+### 2.2 Cryptographic Requirements
+
+:::caution[Normative †]
+Implementations **MUST** support:
+
+1. **Encryption:** XChaCha20-Poly1305 (AEAD)
+2. **Key Derivation:** Argon2id with minimum parameters:
+   - Memory: 64 MB
+   - Iterations: 3
+   - Parallelism: 4
+3. **Signing:** Ed25519
+4. **Hashing:** SHA-256 for content addressing
+:::
+
+### 2.3 Artifact Requirements
+
+:::caution[Normative †]
+Each artifact entry **MUST** include:
+
+- `path`: Relative path within the workspace
+- `kind`: One of `memory`, `persona`, `config`, `state`, `other`
+- `mode`: One of `public`, `private`, `exclude`
+- `plaintext_hash`: SHA-256 hash of original content
+- `size_bytes`: Integer size in bytes
+- `blob_id`: Reference to encrypted blob
+:::
+
+---
+
+## 3. Non-Normative Guidance {#non-normative}
+
+### 3.1 Layer Model
+
+The specification defines a three-layer architecture:
+
+```
+┌─────────────────────────────────────┐
+│         PRESENTATION LAYER          │
+│  (CLI, GUI, Agent Integration)      │
+├─────────────────────────────────────┤
+│           CAPSULE LAYER             │
+│  (Manifest, Artifacts, Blobs)       │
+├─────────────────────────────────────┤
+│          STORAGE LAYER              │
+│  (Local, S3, R2, IPFS)              │
+└─────────────────────────────────────┘
+```
+
+### 3.2 Recommended Practices
+
+- Use environment variables for passphrases (`env:PASSPHRASE`)
+- Store signing keys with restricted permissions (0600)
+- Enable compression for text-heavy workspaces
+- Verify manifests before import using trusted signers
+
+---
+
+## 4. Security Considerations {#security}
+
+### 4.1 Threat Model
+
+:::danger[Security Warning]
+Resurrectum assumes:
+
+1. **Storage is untrusted:** All data is E2EE before leaving the client
+2. **Signers must be verified:** Public keys in manifests are NOT trusted without external verification
+3. **Passphrases must be strong:** Key derivation parameters assume reasonable passphrase entropy
+
+Resurrectum does NOT protect against:
+
+1. Compromised client environments
+2. Weak or leaked passphrases
+3. Malicious trusted signers
+:::
+
+### 4.2 Signature Verification
+
+:::caution[Normative †]
+When importing a capsule:
+
+1. **MUST** verify signature using a pre-trusted signer identity
+2. **MUST NOT** trust the embedded public key without external verification
+3. **SHOULD** maintain a registry of trusted signer fingerprints
+:::
+
+### 4.3 Redaction Policy
+
+The redaction policy determines what data is included in exports:
+
+| Classification | Export Behavior |
+|----------------|-----------------|
+| `public` | Included, unencrypted metadata |
+| `private` | Included, encrypted |
+| `sensitive` | Excluded by default |
+| `forbidden` | Never exported |
+
+See [Redaction Policy](/spec/protocol/#redaction) for details.
+
+---
+
+## 5. Versioning {#versioning}
+
+:::note[Informative ⟂]
+**Schema Version:** Follows SemVer. Breaking changes increment major version.
+
+**Spec Version:** Currently `v1`. Future versions will be `v2`, etc.
+
+**Backward Compatibility:** Implementations SHOULD support reading manifests from older schema versions within the same spec version.
+:::

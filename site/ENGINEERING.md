@@ -952,7 +952,7 @@ export default defineConfig({
       ],
       defaultLocale: 'en',
       social: {
-        github: 'https://github.com/lu770/resurrectum',
+        github: 'https://github.com/claaaaaw/resurrectum',
       },
     }),
   ],

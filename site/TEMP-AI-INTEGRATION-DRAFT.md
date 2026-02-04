@@ -249,7 +249,7 @@ Add to your MCP config:
 
 ## Source Code
 
-https://github.com/lu770/resurrectum
+https://github.com/claaaaaw/resurrectum
 ```
 
 ---

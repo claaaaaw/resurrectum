@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://resurrectum.dev/schemas/v1/capsule.manifest.schema.json",
+  "title": "Resurrectum Manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "patternProperties": {
+    "^x_": {}
+  },
+  "required": [
+    "spec_version",
+    "schema_version",
+    "capsule_id",
+    "created_at",
+    "tool",
+    "crypto",
+    "artifacts",
+    "blobs",
+    "redaction",
+    "signature"
+  ],
+  "properties": {
+    "spec_version": { "const": "v1" },
+    "schema_version": { "$ref": "#/$defs/semver" },
+    "capsule_id": { "$ref": "#/$defs/uuidv7" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": { "^x_": {} },
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": { "^x_": {} },
+      "properties": {
+        "workspace_fingerprint": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "openclaw_version": { "type": "string" },
+        "host_tz": { "type": "string" }
+      }
+    },
+    "crypto": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": { "^x_": {} },
+      "required": ["aead", "kdf", "key_source", "hkdf_info", "kdf_params"],
+      "properties": {
+        "aead": { "type": "string", "enum": ["xchacha20-poly1305", "aes-256-gcm"] },
+        "kdf": { "type": "string", "const": "hkdf-sha256" },
+        "key_source": { "type": "string", "const": "passphrase_argon2id" },
+        "hkdf_info": { "type": "string", "const": "capsule:blob" },
+        "kdf_params": {
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": { "^x_": {} },
+          "required": ["alg", "salt", "mem_kib", "iterations", "parallelism", "hash_len"],
+          "properties": {
+            "alg": { "type": "string", "const": "argon2id" },
+            "salt": { "$ref": "#/$defs/base64url" },
+            "mem_kib": { "type": "integer", "minimum": 1 },
+            "iterations": { "type": "integer", "minimum": 1 },
+            "parallelism": { "type": "integer", "minimum": 1 },
+            "hash_len": { "type": "integer", "const": 32 }
+          }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/artifact" }
+    },
+    "blobs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/blob" }
+    },
+    "redaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": { "^x_": {} },
+      "required": ["report_path", "policy_version"],
+      "properties": {
+        "report_path": { "type": "string", "const": "redaction.report.json" },
+        "policy_version": { "type": "string" }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": { "^x_": {} },
+      "required": ["alg", "payload_alg", "public_key", "signer_fingerprint", "sig"],
+      "properties": {
+        "alg": { "type": "string", "const": "ed25519" },
+        "payload_alg": { "type": "string", "const": "rfc8785_jcs_without_signature_utf8" },
+        "public_key": { "$ref": "#/$defs/base64url" },
+        "signer_fingerprint": { "$ref": "#/$defs/hex64" },
+        "sig": { "$ref": "#/$defs/base64url" }
+      }
+    }
+  },
+  "$defs": {
+    "hex64": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "base64url": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$" },
+    "uuidv7": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "semver": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "path": {
+      "type": "string",
+      "pattern": "^(?!/)(?!.*\\\\)(?!^[A-Za-z]:)(?!.*(?:^|/)\\.\\.(?:/|$)).+"
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": { "^x_": {} },
+      "required": ["path", "kind", "mode", "plaintext_hash", "size_bytes", "blob_id"],
+      "properties": {
+        "path": { "$ref": "#/$defs/path" },
+        "kind": {
+          "type": "string",
+          "anyOf": [
+            { "enum": ["memory", "persona", "ops", "project", "other"] },
+            { "pattern": "^x_" }
+          ]
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["include_encrypted", "include_redacted", "include_plaintext"]
+        },
+        "plaintext_hash": { "$ref": "#/$defs/hex64" },
+        "size_bytes": { "type": "integer", "minimum": 0 },
+        "blob_id": { "$ref": "#/$defs/hex64" }
+      }
+    },
+    "blob": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": { "^x_": {} },
+      "required": ["blob_id", "ciphertext_hash", "ciphertext_size_bytes", "nonce", "storage"],
+      "properties": {
+        "blob_id": { "$ref": "#/$defs/hex64" },
+        "ciphertext_hash": { "$ref": "#/$defs/hex64" },
+        "ciphertext_size_bytes": { "type": "integer", "minimum": 0 },
+        "nonce": { "$ref": "#/$defs/base64url" },
+        "storage": {
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": { "^x_": {} },
+          "required": ["backend", "ref"],
+          "properties": {
+            "backend": { "type": "string", "enum": ["local_dir", "s3"] },
+            "ref": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  }
+}

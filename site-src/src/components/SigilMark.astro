@@ -1,0 +1,66 @@
+---
+/**
+ * SigilMark - Small inline sigil marker for status indication
+ */
+interface Props {
+  type: 'normative' | 'informative' | 'deprecated' | 'canon' | 'meditations';
+  showLabel?: boolean;
+}
+
+const { type, showLabel = false } = Astro.props;
+
+const sigils: Record<string, { symbol: string; label: string }> = {
+  normative: { symbol: '†', label: 'Normative' },
+  informative: { symbol: '⟂', label: 'Informative' },
+  deprecated: { symbol: '⊗', label: 'Deprecated' },
+  canon: { symbol: '⊕', label: 'Canon' },
+  meditations: { symbol: '◇', label: 'Meditations' },
+};
+
+const { symbol, label } = sigils[type] || sigils.informative;
+---
+
+<span class={`sigil-mark sigil-mark--${type}`} title={label}>
+  <span class="sigil-mark__symbol">{symbol}</span>
+  {showLabel && <span class="sigil-mark__label">{label}</span>}
+</span>
+
+<style>
+  .sigil-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-family: var(--font-mono);
+    font-size: var(--font-size-xs);
+  }
+
+  .sigil-mark__symbol {
+    font-size: 1.1em;
+  }
+
+  .sigil-mark--normative {
+    color: var(--color-normative);
+  }
+
+  .sigil-mark--informative {
+    color: var(--color-informative);
+  }
+
+  .sigil-mark--deprecated {
+    color: var(--color-deprecated);
+  }
+
+  .sigil-mark--canon {
+    color: var(--color-accent-green);
+  }
+
+  .sigil-mark--meditations {
+    color: var(--color-accent-yellow);
+  }
+
+  .sigil-mark__label {
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+</style>

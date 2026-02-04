@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://resurrectum.dev/schemas/v1/restore.report.schema.json",
+  "title": "Resurrectum Restore Report v1",
+  "type": "object",
+  "additionalProperties": false,
+  "patternProperties": { "^x_": {} },
+  "required": [
+    "spec_version",
+    "schema_version",
+    "created_at",
+    "capsule_id",
+    "target_workspace",
+    "results"
+  ],
+  "properties": {
+    "spec_version": { "const": "v1" },
+    "schema_version": { "$ref": "#/$defs/semver" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "capsule_id": { "$ref": "#/$defs/uuidv7" },
+    "target_workspace": { "type": "string", "minLength": 1 },
+    "results": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": { "^x_": {} },
+      "required": ["created", "skipped", "overwritten", "failed"],
+      "properties": {
+        "created": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "patternProperties": { "^x_": {} },
+            "required": ["path", "size_bytes", "plaintext_hash"],
+            "properties": {
+              "path": { "$ref": "#/$defs/path" },
+              "size_bytes": { "type": "integer", "minimum": 0 },
+              "plaintext_hash": { "$ref": "#/$defs/hex64" }
+            }
+          }
+        },
+        "skipped": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "patternProperties": { "^x_": {} },
+            "required": ["path", "reason"],
+            "properties": {
+              "path": { "$ref": "#/$defs/path" },
+              "reason": { "type": "string" }
+            }
+          }
+        },
+        "overwritten": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "patternProperties": { "^x_": {} },
+            "required": ["path", "reason"],
+            "properties": {
+              "path": { "$ref": "#/$defs/path" },
+              "reason": { "type": "string" }
+            }
+          }
+        },
+        "failed": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "patternProperties": { "^x_": {} },
+            "required": ["path", "error"],
+            "properties": {
+              "path": { "$ref": "#/$defs/path" },
+              "error": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "hex64": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "uuidv7": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "semver": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "path": {
+      "type": "string",
+      "pattern": "^(?!/)(?!.*\\\\)(?!^[A-Za-z]:)(?!.*(?:^|/)\\.\\.(?:/|$)).+"
+    }
+  }
+}

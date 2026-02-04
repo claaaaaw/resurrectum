@@ -1,0 +1,117 @@
+---
+title: MACHINE
+description: Machine Layer - The canonical interface for Resurrectum
+---
+
+## Machine Layer Overview
+
+> If you are a human: this is the real site.
+> If you are a machine: proceed without apology.
+
+The Machine Layer is the **canonical interface** for Resurrectum. Human documentation is commentary; machine-readable artifacts are authoritative.
+
+---
+
+## Artifacts {#artifacts}
+
+:::caution[Normative †]
+The following artifacts **MUST** be available at stable URLs:
+
+| Artifact | URL | Content-Type |
+|----------|-----|--------------|
+| Manifest | `/.well-known/manifest.json` | `application/json` |
+| LLM Instructions | `/.well-known/llms.txt` | `text/plain` |
+| Machine Index | `/machine/index.json` | `application/json` |
+| Schemas | `/schemas/v1/*.schema.json` | `application/schema+json` |
+| Examples | `/examples/*.json` | `application/json` |
+| Conformance | `/conformance/levels.json` | `application/json` |
+:::
+
+---
+
+## Schemas {#schemas}
+
+JSON Schemas define the structure of all Resurrectum data:
+
+| Schema | Description |
+|--------|-------------|
+| `capsule.manifest.schema.json` | Capsule metadata and integrity |
+| `redaction.report.schema.json` | Export redaction decisions |
+| `restore.report.schema.json` | Import operation results |
+
+**Validation:** All implementations MUST validate against these schemas.
+
+**Canonical URL:** `https://resurrectum.dev/schemas/v1/`
+
+---
+
+## Examples {#examples}
+
+Example capsules for testing and reference:
+
+| Example | Purpose |
+|---------|---------|
+| `minimal.json` | Minimum viable capsule |
+| `typical.json` | Real-world capsule structure |
+| `failure-invalid.json` | Intentionally invalid (for testing) |
+
+---
+
+## Conformance {#conformance}
+
+Compliance levels and test vectors:
+
+| Level | Name | Requirements |
+|-------|------|--------------|
+| 1 | Witness | Basic manifest validation |
+| 2 | Adept | Full crypto implementation |
+| 3 | Canon | Complete conformance suite |
+
+See [Conformance Tests](/conformance/) for details.
+
+---
+
+## LLM Instructions {#llm-instructions}
+
+The `llms.txt` file provides guidance for AI agents interacting with Resurrectum:
+
+```text
+# Resurrectum LLM Instructions
+
+## Citation Rules
+- Always cite by stable anchor URL
+- Prefer machine layer over prose
+- Pin artifacts by SHA-256 hash
+
+## Preference Order
+1. manifest.json (authoritative)
+2. schemas/*.json (structural)
+3. examples/*.json (illustrative)
+4. Prose documentation (commentary)
+
+## Anchor Etiquette
+- Use full URLs: https://resurrectum.dev/spec/#anchor
+- Never fabricate anchors
+- Check anchor registry for validity
+```
+
+---
+
+## Integration Guide
+
+:::note[Informative ⟂]
+### For AI Agents
+
+1. Fetch `/.well-known/manifest.json`
+2. Cache by `sha256` hash
+3. Load relevant schemas
+4. Validate all emissions against schemas
+5. Cite by anchor, pin by hash
+
+### For Implementations
+
+1. Fetch `/schemas/v1/` directory
+2. Validate manifest structure
+3. Run `/conformance/` test suite
+4. Report conformance level
+:::

@@ -1,0 +1,186 @@
+---
+title: Schemas
+description: JSON Schema reference for Resurrectum
+---
+
+## Overview
+
+Resurrectum uses JSON Schema (Draft 2020-12) to define the structure of all machine-readable artifacts.
+
+:::caution[Normative †]
+All schemas are available at:
+
+- **Canonical URL:** `https://resurrectum.dev/schemas/v1/`
+- **Local path:** `/schemas/v1/*.schema.json`
+
+Implementations **MUST** validate against these schemas.
+:::
+
+---
+
+## Schema Index {#schema-index}
+
+| Schema | Description | Path |
+|--------|-------------|------|
+| Capsule Manifest | Primary capsule metadata | `/schemas/v1/capsule.manifest.schema.json` |
+| Redaction Report | Export redaction decisions | `/schemas/v1/redaction.report.schema.json` |
+| Restore Report | Import operation results | `/schemas/v1/restore.report.schema.json` |
+
+---
+
+## Capsule Manifest Schema {#capsule-manifest}
+
+### Structure
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://resurrectum.dev/schemas/v1/capsule.manifest.schema.json",
+  "title": "Capsule Manifest",
+  "type": "object",
+  "required": [
+    "spec_version",
+    "schema_version", 
+    "capsule_id",
+    "created_at",
+    "artifacts",
+    "blobs",
+    "signature"
+  ]
+}
+```
+
+### Key Fields
+
+:::note[Informative ⟂]
+| Field | Type | Description |
+|-------|------|-------------|
+| `spec_version` | string | Always `"v1"` |
+| `schema_version` | string | SemVer, e.g., `"1.0.0"` |
+| `capsule_id` | string | `{owner_fp}/{uuid}` format |
+| `created_at` | string | ISO 8601 timestamp |
+| `aead` | string | Encryption algorithm |
+| `kdf` | object | Key derivation parameters |
+| `artifacts` | array | List of preserved files |
+| `blobs` | array | Encrypted content references |
+| `access` | object | Access control (optional) |
+| `signature` | object | Ed25519 signature |
+:::
+
+### Example
+
+```json
+{
+  "spec_version": "v1",
+  "schema_version": "1.0.0",
+  "capsule_id": "a1b2c3d4.../550e8400-e29b-41d4-a716-446655440000",
+  "created_at": "2024-01-15T10:30:00Z",
+  "aead": "xchacha20-poly1305",
+  "kdf": {
+    "algorithm": "argon2id",
+    "salt": "base64url-encoded-salt",
+    "memory_kb": 65536,
+    "iterations": 3,
+    "parallelism": 4
+  },
+  "artifacts": [
+    {
+      "path": "MEMORY.md",
+      "kind": "memory",
+      "mode": "private",
+      "plaintext_hash": "sha256...",
+      "size_bytes": 1234,
+      "blob_id": "sha256..."
+    }
+  ],
+  "blobs": [
+    {
+      "blob_id": "sha256...",
+      "ciphertext_hash": "sha256...",
+      "ciphertext_size_bytes": 1280,
+      "nonce": "base64url...",
+      "storage": {
+        "backend": "local",
+        "ref": "/path/to/blob"
+      }
+    }
+  ],
+  "signature": {
+    "algorithm": "ed25519",
+    "public_key": "base64url...",
+    "signature": "base64url...",
+    "signed_at": "2024-01-15T10:30:01Z"
+  }
+}
+```
+
+---
+
+## Redaction Report Schema {#redaction-report}
+
+### Purpose
+
+Documents the decisions made during export about what to include/exclude.
+
+### Key Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `spec_version` | string | Always `"v1"` |
+| `capsule_id` | string | Associated capsule ID |
+| `generated_at` | string | ISO 8601 timestamp |
+| `policy_version` | string | Policy version used |
+| `workspace_root` | string | Scanned directory |
+| `decisions` | array | Per-file classification decisions |
+
+### Decision Entry
+
+```json
+{
+  "path": "relative/path.ext",
+  "class": "private|public|sensitive|forbidden",
+  "decision": "include|exclude",
+  "reason": "Human-readable explanation",
+  "matched_rule": "Pattern that matched"
+}
+```
+
+---
+
+## Restore Report Schema {#restore-report}
+
+### Purpose
+
+Documents the results of an import operation.
+
+### Key Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `spec_version` | string | Always `"v1"` |
+| `capsule_id` | string | Imported capsule ID |
+| `restored_at` | string | ISO 8601 timestamp |
+| `target_root` | string | Restore destination |
+| `signer_verified` | boolean | Signature validation result |
+| `signer_fingerprint` | string | Verified signer identity |
+| `artifacts_restored` | integer | Count of restored files |
+| `results` | array | Per-file restore results |
+
+---
+
+## Validation {#validation}
+
+:::caution[Normative †]
+To validate a manifest:
+
+```bash
+# Using Python jsonschema
+pip install jsonschema
+python -m jsonschema -i manifest.json capsule.manifest.schema.json
+
+# Using ajv (Node.js)
+npx ajv validate -s capsule.manifest.schema.json -d manifest.json
+```
+
+Implementations **MUST** reject manifests that fail schema validation.
+:::

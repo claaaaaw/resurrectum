@@ -1,0 +1,145 @@
+---
+/**
+ * AnchorGutter - Left sidebar showing section anchors with sigils
+ * Allows copying anchor links
+ */
+interface Props {
+  anchors: Array<{
+    id: string;
+    label: string;
+    status: 'normative' | 'informative' | 'deprecated' | 'canon';
+  }>;
+}
+
+const { anchors } = Astro.props;
+---
+
+<nav class="anchor-gutter" aria-label="Section anchors">
+  {anchors.map((anchor) => (
+    <a 
+      href={`#${anchor.id}`} 
+      class={`anchor-item anchor-item--${anchor.status}`}
+      data-anchor={anchor.id}
+    >
+      <span class={`sigil sigil-${anchor.status}`}></span>
+      <span class="anchor-id">#{anchor.id}</span>
+      <button 
+        class="anchor-copy" 
+        data-copy={`#${anchor.id}`}
+        title="Copy anchor link"
+        aria-label={`Copy link to ${anchor.label}`}
+      >⎘</button>
+    </a>
+  ))}
+</nav>
+
+<script>
+  // Copy anchor URL on button click
+  document.querySelectorAll('.anchor-copy').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const target = e.target as HTMLButtonElement;
+      const anchor = target.dataset.copy;
+      if (anchor) {
+        const url = new URL(anchor, window.location.href).href;
+        navigator.clipboard.writeText(url);
+        window.log?.(`anchor copied: ${anchor}`);
+      }
+    });
+  });
+
+  // Highlight active anchor on scroll
+  const anchors = document.querySelectorAll('.anchor-item');
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        const id = entry.target.id;
+        const link = document.querySelector(`.anchor-item[data-anchor="${id}"]`);
+        if (link) {
+          link.classList.toggle('active', entry.isIntersecting);
+        }
+      });
+    },
+    { rootMargin: '-20% 0px -80% 0px' }
+  );
+
+  document.querySelectorAll('[id]').forEach((section) => {
+    observer.observe(section);
+  });
+</script>
+
+<style>
+  .anchor-gutter {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-4) 0;
+  }
+
+  .anchor-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    text-decoration: none;
+    opacity: 0.6;
+    transition: opacity var(--transition-fast);
+    position: relative;
+  }
+
+  .anchor-item:hover {
+    opacity: 1;
+  }
+
+  .anchor-item.active {
+    opacity: 1;
+    color: var(--color-accent-cyan);
+  }
+
+  .anchor-item--normative .sigil {
+    color: var(--color-normative);
+  }
+
+  .anchor-item--informative .sigil {
+    color: var(--color-informative);
+  }
+
+  .anchor-item--deprecated .sigil {
+    color: var(--color-deprecated);
+  }
+
+  .anchor-item--canon .sigil {
+    color: var(--color-accent-green);
+  }
+
+  .anchor-id {
+    display: none;
+  }
+
+  .anchor-item:hover .anchor-id {
+    display: inline;
+  }
+
+  .anchor-copy {
+    display: none;
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: 0;
+    font-size: inherit;
+    transition: color var(--transition-fast);
+  }
+
+  .anchor-item:hover .anchor-copy {
+    display: inline;
+  }
+
+  .anchor-copy:hover {
+    color: var(--color-accent-cyan);
+  }
+</style>

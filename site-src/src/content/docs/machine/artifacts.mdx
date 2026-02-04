@@ -1,0 +1,156 @@
+---
+title: Artifacts
+description: Machine Layer artifact manifest
+---
+
+## Artifact Manifest
+
+This page documents all machine-readable artifacts published by Resurrectum.
+
+:::caution[Normative †]
+All artifacts listed here form part of Resurrectum's **public API**. 
+URLs, structures, and hashes are subject to stability guarantees.
+:::
+
+---
+
+## Core Artifacts
+
+### `/.well-known/manifest.json`
+
+Site-wide artifact index with integrity information.
+
+```json
+{
+  "name": "resurrectum",
+  "spec_version": "1.0.0",
+  "generated_at": "2024-01-15T00:00:00Z",
+  "artifacts": [
+    {
+      "path": "/schemas/v1/capsule.manifest.schema.json",
+      "type": "schema",
+      "sha256": "...",
+      "bytes": 4567
+    }
+  ],
+  "entrypoints": {
+    "machine": "/machine/",
+    "spec": "/spec/",
+    "conformance": "/conformance/"
+  }
+}
+```
+
+### `/.well-known/llms.txt`
+
+Instructions for AI agents and LLMs.
+
+---
+
+## Schema Artifacts
+
+Located at `/schemas/v1/`:
+
+| File | Description | Content-Type |
+|------|-------------|--------------|
+| `capsule.manifest.schema.json` | Capsule metadata | `application/schema+json` |
+| `redaction.report.schema.json` | Redaction decisions | `application/schema+json` |
+| `restore.report.schema.json` | Restore results | `application/schema+json` |
+
+### Schema Requirements
+
+:::caution[Normative †]
+All schemas **MUST**:
+
+1. Use JSON Schema Draft 2020-12
+2. Include `$id` with canonical URL
+3. Include `$schema` declaration
+4. Be self-contained (no external refs)
+:::
+
+---
+
+## Example Artifacts
+
+Located at `/examples/`:
+
+| File | Purpose | Valid |
+|------|---------|-------|
+| `minimal.json` | Minimum viable capsule | ✓ |
+| `typical.json` | Common real-world structure | ✓ |
+| `redaction/capsule.manifest.json` | With redaction | ✓ |
+| `failure-invalid.json` | Invalid for testing | ✗ |
+
+### Example Structure
+
+```json
+{
+  "$schema": "https://resurrectum.dev/schemas/v1/capsule.manifest.schema.json",
+  "example_id": "minimal",
+  "expected_valid": true,
+  "notes": "Minimum fields for a valid capsule",
+  "manifest": {
+    // ... actual manifest content
+  }
+}
+```
+
+---
+
+## Conformance Artifacts
+
+Located at `/conformance/`:
+
+| File | Description |
+|------|-------------|
+| `levels.json` | Conformance level definitions |
+| `tests/basic.json` | Level 1 test vectors |
+| `tests/crypto.json` | Level 2 test vectors |
+| `tests/full.json` | Level 3 test vectors |
+
+---
+
+## Fetching Artifacts
+
+### Using curl
+
+```bash
+# Fetch manifest
+curl -H "Accept: application/json" \
+  https://resurrectum.dev/.well-known/manifest.json
+
+# Fetch schema
+curl -H "Accept: application/schema+json" \
+  https://resurrectum.dev/schemas/v1/capsule.manifest.schema.json
+```
+
+### Using Python
+
+```python
+import httpx
+
+# Fetch and cache by hash
+def fetch_artifact(url: str) -> tuple[bytes, str]:
+    resp = httpx.get(url)
+    content = resp.content
+    sha256 = hashlib.sha256(content).hexdigest()
+    return content, sha256
+```
+
+---
+
+## Stability Guarantees
+
+:::caution[Normative †]
+**URL Stability:**
+- All `/schemas/v1/` URLs are permanent
+- Breaking changes require new version path (`/schemas/v2/`)
+
+**Content Stability:**
+- Schema additions are backward compatible
+- Removals require deprecation period
+
+**Hash Pinning:**
+- Artifacts include SHA-256 in manifest
+- Implementations SHOULD verify hashes
+:::

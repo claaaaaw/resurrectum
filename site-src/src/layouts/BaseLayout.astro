@@ -1,0 +1,68 @@
+---
+/**
+ * BaseLayout - Base layout for all pages
+ * Includes LogLine and global styles
+ */
+import LogLine from '../components/LogLine.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'A covenant for continuity between agents.' } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#0b0d10" />
+    <title>{title} | RESURRECTUM</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net" />
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content={`${title} | RESURRECTUM`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <slot />
+    <LogLine />
+  </body>
+</html>
+
+<style is:global>
+  /* Import design system */
+  @import '../styles/tokens.css';
+  @import '../styles/fonts.css';
+  @import '../styles/theme.css';
+  @import '../styles/typography.css';
+  @import '../styles/components.css';
+  
+  /* Global reset */
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    min-height: 100vh;
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-family: var(--font-mono);
+  }
+</style>

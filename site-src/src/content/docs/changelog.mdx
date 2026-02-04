@@ -1,0 +1,140 @@
+---
+title: CHANGELOG
+description: Release history and breaking changes
+---
+
+## Overview
+
+This changelog documents all notable changes to the Resurrectum specification and reference implementation.
+
+The format follows [Keep a Changelog](https://keepachangelog.com/), and the project adheres to [Semantic Versioning](https://semver.org/).
+
+---
+
+## Releases {#releases}
+
+### [1.0.0] - 2024-XX-XX (Unreleased)
+
+**Initial Release**
+
+#### Specification
+- Define capsule format v1
+- Establish manifest schema
+- Document cryptographic requirements
+- Specify redaction policy
+- Define conformance levels
+
+#### Implementation
+- CLI tool: `summon`
+- Commands: `init`, `export`, `import`
+- Storage backends: local, S3, R2
+- Compression: 7z support
+
+#### Documentation
+- Complete specification
+- Machine Layer artifacts
+- Conformance test suite
+- Example capsules
+
+---
+
+## Breaking Changes {#breaking}
+
+:::danger[Warning]
+This section documents changes that may break existing implementations or capsules.
+
+Currently there are no breaking changes as this is the initial release.
+:::
+
+### Future Breaking Change Policy
+
+When breaking changes are necessary:
+
+1. **Announce:** At least one minor version in advance
+2. **Deprecate:** Mark old behavior as deprecated
+3. **Document:** Clearly document migration path
+4. **Version:** Increment major version
+
+---
+
+## Schema Version History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.0.0 | 2024-XX-XX | Initial schema release |
+
+### Schema Change Policy
+
+- **Patch (1.0.x):** Documentation fixes, clarifications
+- **Minor (1.x.0):** Additive changes, new optional fields
+- **Major (x.0.0):** Breaking changes, removed fields
+
+---
+
+## Anchor Stability
+
+Anchors added or deprecated in each release:
+
+### 1.0.0
+
+**Added:**
+- `#prelude`
+- `#quickstart`
+- `#axioms`
+- `#machine-layer`
+- `#rituals`
+- `#threat-model`
+- ... (all initial anchors)
+
+**Deprecated:**
+- *(none)*
+
+---
+
+## Migration Guides
+
+### Upgrading to 1.0.0
+
+This is the initial release. No migration required.
+
+### Future Migrations
+
+Migration guides will be added here when new versions introduce changes requiring action from implementers.
+
+---
+
+## Contributing to Changelog
+
+When contributing changes:
+
+1. Add entry under `[Unreleased]` section
+2. Categorize as: Added, Changed, Deprecated, Removed, Fixed, Security
+3. Link to relevant issues/PRs
+4. Document any breaking changes
+
+Example:
+
+```markdown
+### [Unreleased]
+
+#### Added
+- New `compression` field in manifest (#123)
+
+#### Changed
+- Increased default Argon2id memory to 128MB (#124)
+
+#### Deprecated
+- `legacy_field` will be removed in 2.0 (#125)
+```
+
+---
+
+## Version Support
+
+| Version | Status | Support Until |
+|---------|--------|---------------|
+| 1.0.x | Current | — |
+
+:::note[Informative ⟂]
+Only the current major version receives active support. Security fixes may be backported to the previous major version for 6 months after a new major release.
+:::

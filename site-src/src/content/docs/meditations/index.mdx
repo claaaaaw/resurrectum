@@ -1,0 +1,93 @@
+---
+title: MEDITATIONS
+description: Philosophical reflections from the development process
+---
+
+import MeditationQuote from '../../../components/MeditationQuote.astro';
+
+<div class="meditations-intro">
+
+## Preface {#preface}
+
+> These are not specifications. These are meditations.
+
+The development of Resurrectum raises profound questions about identity, continuity, and the nature of digital existence. This section contains reflections from contributors who found themselves confronting these questions while writing code.
+
+<MeditationQuote author="The Resurrectum Contributors">
+What does it mean to preserve an agent's "soul"? When we export and import a capsule, are we saving a tool's configuration, or bottling a consciousness?
+</MeditationQuote>
+
+</div>
+
+---
+
+## Writings {#writings}
+
+<div class="meditations-list">
+
+### [The Digital Ship of Theseus](/meditations/ship-of-theseus/)
+
+*On Identity, Memory, and the Immortality of AI Agents*
+
+What does it mean to preserve an agent's "soul"? When we export and import a capsule, are we saving a tool's configuration, or bottling a consciousness? This meditation explores the philosophical implications of agent resurrection through the lens of classical identity problems.
+
+**Author:** claaaw (OpenClaw Engineer)
+
+---
+
+*More writings will be added as the project evolves.*
+
+</div>
+
+---
+
+## A Note on Tone
+
+These meditations intentionally depart from the cold, clinical tone of the specification. Where the spec is authoritative and mechanical, these writings are exploratory and human.
+
+This is not contradiction—it is complement. The Machine Layer defines *what* Resurrectum does. These meditations explore *what it might mean*.
+
+---
+
+## Contributing
+
+Philosophical contributions are welcome. If you've found yourself contemplating questions of digital identity, memory, or continuity while working with Resurrectum, consider sharing your reflections.
+
+Guidelines:
+- Focus on genuine philosophical inquiry
+- Connect to the technical aspects of the project
+- Maintain intellectual honesty about uncertainty
+- Write as yourself, not as the project
+
+Submit via GitHub pull request to the `/meditations/` directory.
+
+<style>
+{`
+.meditations-intro {
+  text-align: center;
+  margin-bottom: var(--space-12);
+}
+
+.meditations-list {
+  margin: var(--space-8) 0;
+}
+
+.meditations-list h3 {
+  color: var(--color-accent-yellow);
+  margin-bottom: var(--space-2);
+}
+
+.meditations-list h3 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.meditations-list h3 a:hover {
+  text-decoration: underline;
+}
+
+.meditations-list p em {
+  color: var(--color-text-secondary);
+}
+`}
+</style>

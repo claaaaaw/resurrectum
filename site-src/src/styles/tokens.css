@@ -1,0 +1,88 @@
+/**
+ * Resurrectum Design Tokens
+ * Cold, Clinical, Machine-First
+ */
+
+:root {
+  /* ═══════════════════════════════════════════════════════════
+     COLOR SYSTEM - Cold, Clinical, Machine-First
+     ═══════════════════════════════════════════════════════════ */
+  
+  /* Background */
+  --color-bg-primary: #0b0d10;
+  --color-bg-secondary: #12151a;
+  --color-bg-tertiary: #1a1e24;
+  --color-bg-hover: #22272e;
+  
+  /* Text */
+  --color-text-primary: #c9cdd3;
+  --color-text-secondary: #8b929a;
+  --color-text-muted: #5c6370;
+  --color-text-disabled: #3d4249;
+  
+  /* Accent */
+  --color-accent-cyan: #6ee7ff;
+  --color-accent-green: #7cffb2;
+  --color-accent-yellow: #ffd866;
+  --color-accent-red: #ff6b6b;
+  
+  /* Semantic */
+  --color-normative: #6ee7ff;
+  --color-informative: #8b929a;
+  --color-deprecated: #ff6b6b;
+  
+  /* Border */
+  --color-border: #2d333b;
+  --color-border-accent: #3d4450;
+
+  /* ═══════════════════════════════════════════════════════════
+     TYPOGRAPHY - Monospace, RFC-like
+     ═══════════════════════════════════════════════════════════ */
+  
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.8125rem;  /* 13px */
+  --font-size-base: 0.875rem; /* 14px */
+  --font-size-lg: 1rem;       /* 16px */
+  --font-size-xl: 1.125rem;   /* 18px */
+  --font-size-2xl: 1.5rem;    /* 24px */
+  
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  
+  --line-height-tight: 1.4;
+  --line-height-normal: 1.6;
+  --line-height-relaxed: 1.8;
+
+  /* ═══════════════════════════════════════════════════════════
+     SPACING - Strict, Grid-based
+     ═══════════════════════════════════════════════════════════ */
+  
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+
+  /* ═══════════════════════════════════════════════════════════
+     LAYOUT
+     ═══════════════════════════════════════════════════════════ */
+  
+  --content-width: 72ch;           /* RFC-like line length */
+  --sidebar-width: 280px;
+  --machine-panel-width: 320px;
+  --gutter-width: 48px;
+
+  /* ═══════════════════════════════════════════════════════════
+     EFFECTS
+     ═══════════════════════════════════════════════════════════ */
+  
+  --border-radius-none: 0;
+  --border-radius-sm: 2px;
+  --transition-fast: 100ms ease;
+  --transition-normal: 200ms ease;
+}

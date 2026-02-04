@@ -1,0 +1,101 @@
+{
+  "spec_version": "v1",
+  "schema_version": "1.0.0",
+  "generated_at": "2024-01-15T00:00:00Z",
+  
+  "levels": [
+    {
+      "level": 1,
+      "name": "Witness",
+      "badge": "⟁",
+      "description": "Basic manifest validation",
+      "requirements": [
+        "Parse JSON manifest documents",
+        "Validate manifest structure against schema",
+        "Extract and enumerate artifact list",
+        "Report validation errors with specific field paths",
+        "Handle malformed JSON gracefully"
+      ],
+      "not_required": [
+        "Cryptographic operations",
+        "Decryption capability",
+        "Signature verification"
+      ],
+      "test_categories": [
+        "schema-validation",
+        "error-handling",
+        "edge-cases"
+      ],
+      "minimum_pass_rate": 1.0
+    },
+    {
+      "level": 2,
+      "name": "Adept",
+      "badge": "⟁⟁",
+      "description": "Full cryptographic implementation",
+      "requirements": [
+        "All Level 1 requirements",
+        "Argon2id key derivation with spec parameters",
+        "XChaCha20-Poly1305 AEAD encryption/decryption",
+        "Ed25519 signature verification",
+        "SHA-256 hashing",
+        "Blob integrity verification (ciphertext_hash)",
+        "Artifact integrity verification (plaintext_hash)"
+      ],
+      "recommended": [
+        "Support multiple storage backends",
+        "Cache derived keys appropriately",
+        "Implement constant-time comparisons"
+      ],
+      "test_categories": [
+        "key-derivation",
+        "encryption",
+        "signature",
+        "hashing"
+      ],
+      "minimum_pass_rate": 1.0
+    },
+    {
+      "level": 3,
+      "name": "Canon",
+      "badge": "⟁⟁⟁",
+      "description": "Complete specification compliance",
+      "requirements": [
+        "All Level 2 requirements",
+        "Full export operation",
+        "Full import operation",
+        "Redaction policy implementation",
+        "Storage backend abstraction",
+        "Access control enforcement",
+        "Schema-valid manifest generation",
+        "Schema-valid report generation"
+      ],
+      "test_categories": [
+        "integration",
+        "redaction",
+        "roundtrip",
+        "storage"
+      ],
+      "minimum_pass_rate": 1.0
+    }
+  ],
+  
+  "certification": {
+    "process": [
+      "Run official test suite",
+      "Generate conformance report",
+      "Publish report at stable URL",
+      "Link report in documentation"
+    ],
+    "badge_usage": {
+      "level_1": "⟁ Resurrectum Witness",
+      "level_2": "⟁⟁ Resurrectum Adept",
+      "level_3": "⟁⟁⟁ Resurrectum Canon"
+    },
+    "requirements": {
+      "report_url": "Must be publicly accessible",
+      "badge_link": "Must link to conformance report",
+      "version": "Must specify tested spec version"
+    }
+  }
+}

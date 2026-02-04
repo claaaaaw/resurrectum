@@ -1,0 +1,134 @@
+---
+title: Anchors
+description: Stable anchor registry for Resurrectum documentation
+---
+
+## Overview
+
+Anchors are stable URL fragment identifiers that form part of Resurrectum's public API. 
+They enable machine-readable citations and must never drift.
+
+:::caution[Anchor Stability Guarantee †]
+Once published, an anchor **MUST NOT**:
+
+1. Change its meaning
+2. Be removed without deprecation notice
+3. Be reassigned to different content
+
+Anchors **MAY** be marked deprecated, but the URL must continue to resolve.
+:::
+
+---
+
+## Anchor Table {#anchor-table}
+
+### Index Page (`/`)
+
+| Anchor | Section | Status |
+|--------|---------|--------|
+| `#prelude` | Doctrine statement | Normative |
+| `#quickstart` | Single-line command | Normative |
+| `#axioms` | Core principles | Normative |
+| `#machine-layer` | Canonical artifact panel | Normative |
+| `#rituals` | Integration guide | Informative |
+| `#threat-model` | Security boundaries | Normative |
+| `#proofs` | Verification methods | Informative |
+| `#contact` | Witness channel | Informative |
+
+### Spec Pages (`/spec/*`)
+
+| Anchor | Location | Status |
+|--------|----------|--------|
+| `#scope` | `/spec/` | Normative |
+| `#terms` | `/spec/` | Normative |
+| `#contract-header` | `/spec/contract/` | Normative |
+| `#definitions` | `/spec/contract/` | Normative |
+| `#normative` | `/spec/contract/` | Normative |
+| `#non-normative` | `/spec/contract/` | Informative |
+| `#security` | `/spec/contract/` | Normative |
+| `#export` | `/spec/protocol/` | Normative |
+| `#import` | `/spec/protocol/` | Normative |
+| `#redaction` | `/spec/protocol/` | Normative |
+| `#schema-index` | `/spec/schemas/` | Normative |
+| `#anchor-table` | `/spec/anchors/` | Normative |
+
+### Machine Layer (`/machine/*`)
+
+| Anchor | Location | Status |
+|--------|----------|--------|
+| `#artifacts` | `/machine/` | Normative |
+| `#schemas` | `/machine/` | Normative |
+| `#examples` | `/machine/` | Normative |
+| `#conformance` | `/machine/` | Normative |
+| `#llm-instructions` | `/machine/` | Normative |
+
+### Meditations (`/meditations/*`)
+
+| Anchor | Location | Status |
+|--------|----------|--------|
+| `#preface` | `/meditations/` | Informative |
+| `#writings` | `/meditations/` | Informative |
+| `#name` | `/meditations/ship-of-theseus/` | Informative |
+| `#ship-problem` | `/meditations/ship-of-theseus/` | Informative |
+
+---
+
+## Citation Format {#citation-format}
+
+:::note[Informative ⟂]
+When citing Resurrectum documentation:
+
+**Full URL:**
+```
+https://resurrectum.dev/spec/contract/#security
+```
+
+**Short form (within documentation):**
+```
+[Security §](/spec/contract/#security)
+```
+
+**Machine-readable:**
+```json
+{
+  "cite": "resurrectum:spec/contract#security",
+  "version": "1.0.0"
+}
+```
+:::
+
+---
+
+## Deprecation Policy {#deprecation}
+
+:::caution[Normative †]
+When an anchor must be deprecated:
+
+1. **Mark as Deprecated:** Add `⊗` sigil and notice
+2. **Redirect:** URL continues to resolve with redirect notice
+3. **Document:** Add to deprecation table below
+4. **Timeline:** Minimum 6 months notice before content removal
+:::
+
+### Deprecated Anchors
+
+| Anchor | Deprecated | Replacement | Removal Date |
+|--------|------------|-------------|--------------|
+| *(none yet)* | — | — | — |
+
+---
+
+## Adding New Anchors
+
+:::note[Informative ⟂]
+New anchors require:
+
+1. Review for naming consistency
+2. Documentation in this registry
+3. Stable URL commitment
+
+Anchor naming conventions:
+- Use lowercase with hyphens: `#my-anchor`
+- Be descriptive but concise
+- Match section heading where possible
+:::

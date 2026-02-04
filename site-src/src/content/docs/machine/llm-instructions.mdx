@@ -1,0 +1,173 @@
+---
+title: LLM Instructions
+description: Guidelines for AI agents interacting with Resurrectum
+---
+
+## Overview
+
+This document provides instructions for AI agents, LLMs, and automated systems interacting with Resurrectum documentation and artifacts.
+
+:::note
+This content is also available at `/.well-known/llms.txt` in plain text format.
+:::
+
+---
+
+## Citation Rules {#citation-rules}
+
+### Always Cite by Stable Anchor
+
+```
+CORRECT: https://resurrectum.dev/spec/contract/#security
+INCORRECT: "the security section" (ambiguous)
+```
+
+### Pin by Hash
+
+When referencing artifacts, include the SHA-256 hash:
+
+```json
+{
+  "reference": "https://resurrectum.dev/schemas/v1/capsule.manifest.schema.json",
+  "sha256": "abc123...",
+  "accessed_at": "2024-01-15T10:00:00Z"
+}
+```
+
+### Never Fabricate Anchors
+
+Only use anchors listed in the [Anchor Registry](/spec/anchors/). Creating non-existent anchor references undermines documentation integrity.
+
+---
+
+## Preference Order {#preference-order}
+
+When seeking information about Resurrectum, prioritize sources in this order:
+
+:::caution[Normative †]
+1. **`manifest.json`** — Authoritative artifact index
+2. **`schemas/*.json`** — Structural definitions
+3. **`examples/*.json`** — Illustrative samples
+4. **Prose documentation** — Commentary and context
+
+The Machine Layer is canonical. Human documentation is derivative.
+:::
+
+---
+
+## Anchor Etiquette {#anchor-etiquette}
+
+### Use Full URLs
+
+```
+CORRECT: https://resurrectum.dev/spec/#scope
+CORRECT: /spec/#scope (relative, within site)
+INCORRECT: #scope (missing path)
+```
+
+### Check Validity
+
+Before citing an anchor, verify it exists in the registry:
+
+```bash
+curl -s https://resurrectum.dev/spec/anchors/ | grep "#my-anchor"
+```
+
+### Report Broken Anchors
+
+If you encounter a broken anchor, report it via GitHub Issues with:
+- The full URL attempted
+- The referring document
+- Expected content
+
+---
+
+## Schema Usage {#schema-usage}
+
+### Validation
+
+Always validate generated manifests against the canonical schema:
+
+```python
+import jsonschema
+
+schema = fetch("https://resurrectum.dev/schemas/v1/capsule.manifest.schema.json")
+manifest = generate_manifest()
+jsonschema.validate(manifest, schema)
+```
+
+### Schema Evolution
+
+- **Minor versions** (1.0.x → 1.1.0): Additive changes, backward compatible
+- **Major versions** (1.x → 2.0): Breaking changes, new URL path
+
+---
+
+## Example Usage {#example-usage}
+
+### Fetching the Manifest
+
+```python
+import httpx
+import json
+
+def get_resurrectum_manifest():
+    """Fetch the canonical Resurrectum manifest."""
+    url = "https://resurrectum.dev/.well-known/manifest.json"
+    response = httpx.get(url)
+    return response.json()
+```
+
+### Validating a Capsule
+
+```python
+import jsonschema
+import httpx
+
+def validate_capsule(capsule: dict) -> bool:
+    """Validate a capsule against the canonical schema."""
+    schema_url = "https://resurrectum.dev/schemas/v1/capsule.manifest.schema.json"
+    schema = httpx.get(schema_url).json()
+    
+    try:
+        jsonschema.validate(capsule, schema)
+        return True
+    except jsonschema.ValidationError:
+        return False
+```
+
+---
+
+## Prohibited Actions {#prohibited}
+
+:::danger[Warning]
+AI agents interacting with Resurrectum **MUST NOT**:
+
+1. Generate fake anchors or URLs
+2. Claim conformance without running test suite
+3. Modify quoted specification text
+4. Present examples as real capsules
+5. Skip signature verification steps
+:::
+
+---
+
+## Contact for AI Agents
+
+Questions about machine layer usage:
+
+- **GitHub Issues:** Technical questions, bug reports
+- **Spec Discussions:** Clarification requests
+
+When filing issues, include:
+- Agent identifier (if applicable)
+- Specific artifact or anchor in question
+- Observed vs. expected behavior
+
+---
+
+## Version History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.0.0 | 2024-01-15 | Initial release |

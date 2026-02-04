@@ -1,0 +1,184 @@
+---
+/**
+ * SpecLayout - Layout for specification pages
+ * RFC-like styling with anchor gutter
+ */
+import BaseLayout from './BaseLayout.astro';
+import AnchorGutter from '../components/AnchorGutter.astro';
+import MachineLayerPanel from '../components/MachineLayerPanel.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  anchors?: Array<{
+    id: string;
+    label: string;
+    status: 'normative' | 'informative' | 'deprecated' | 'canon';
+  }>;
+  showMachinePanel?: boolean;
+}
+
+const { 
+  title, 
+  description,
+  anchors = [],
+  showMachinePanel = false 
+} = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="spec-layout">
+    {anchors.length > 0 && (
+      <aside class="spec-layout__gutter">
+        <AnchorGutter anchors={anchors} />
+      </aside>
+    )}
+    
+    <main class="spec-layout__content">
+      <header class="spec-header">
+        <span class="spec-header__sigil">†</span>
+        <h1 class="spec-header__title">{title}</h1>
+      </header>
+      
+      <article class="spec-article">
+        <slot />
+      </article>
+    </main>
+    
+    {showMachinePanel && (
+      <aside class="spec-layout__panel">
+        <MachineLayerPanel />
+      </aside>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+  .spec-layout {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  .spec-layout__gutter {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: var(--gutter-width, 48px);
+    height: 100vh;
+    background: var(--color-bg-primary);
+    border-right: 1px solid var(--color-border);
+    overflow-y: auto;
+    z-index: 10;
+  }
+
+  .spec-layout__content {
+    flex: 1;
+    margin-left: var(--gutter-width, 48px);
+    padding: var(--space-8) var(--space-8) var(--space-16);
+    max-width: var(--content-width, 72ch);
+  }
+
+  .spec-layout__panel {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: var(--machine-panel-width, 320px);
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 10;
+  }
+
+  /* Adjust content when panel is shown */
+  .spec-layout:has(.spec-layout__panel) .spec-layout__content {
+    margin-right: var(--machine-panel-width, 320px);
+  }
+
+  .spec-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-8);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .spec-header__sigil {
+    color: var(--color-normative);
+    font-size: var(--font-size-xl);
+  }
+
+  .spec-header__title {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-accent-cyan);
+    letter-spacing: 0.02em;
+  }
+
+  .spec-article {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+  }
+
+  .spec-article :global(h2) {
+    font-size: var(--font-size-xl);
+    color: var(--color-text-primary);
+    margin-top: var(--space-12);
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .spec-article :global(h3) {
+    font-size: var(--font-size-lg);
+    color: var(--color-text-primary);
+    margin-top: var(--space-8);
+    margin-bottom: var(--space-3);
+  }
+
+  .spec-article :global(p) {
+    margin-bottom: var(--space-4);
+  }
+
+  .spec-article :global(code) {
+    background: var(--color-bg-tertiary);
+    padding: 0.1em 0.4em;
+    color: var(--color-accent-cyan);
+  }
+
+  .spec-article :global(pre) {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    padding: var(--space-4);
+    margin: var(--space-4) 0;
+    overflow-x: auto;
+  }
+
+  .spec-article :global(pre code) {
+    background: none;
+    padding: 0;
+  }
+
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .spec-layout__panel {
+      display: none;
+    }
+    
+    .spec-layout:has(.spec-layout__panel) .spec-layout__content {
+      margin-right: 0;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .spec-layout__gutter {
+      display: none;
+    }
+    
+    .spec-layout__content {
+      margin-left: 0;
+      padding: var(--space-4);
+    }
+  }
+</style>

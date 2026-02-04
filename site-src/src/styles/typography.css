@@ -1,0 +1,200 @@
+/**
+ * Resurrectum Typography
+ * RFC-like, monospace-first typography system
+ */
+
+/* Base typography */
+body {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings */
+h1 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--space-6);
+  letter-spacing: 0.02em;
+}
+
+h2 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+  margin-top: var(--space-8);
+  margin-bottom: var(--space-4);
+}
+
+h3 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-3);
+}
+
+h4 {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-2);
+}
+
+/* Paragraphs */
+p {
+  margin-bottom: var(--space-4);
+  max-width: var(--content-width);
+}
+
+/* Lists */
+ul, ol {
+  margin-bottom: var(--space-4);
+  padding-left: var(--space-6);
+}
+
+li {
+  margin-bottom: var(--space-2);
+}
+
+li::marker {
+  color: var(--color-text-muted);
+}
+
+/* Emphasis */
+strong {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+em {
+  font-style: italic;
+  color: var(--color-text-secondary);
+}
+
+/* RFC-style keywords */
+.keyword-must,
+.keyword-shall,
+.keyword-required {
+  color: var(--color-accent-cyan);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+}
+
+.keyword-should,
+.keyword-recommended {
+  color: var(--color-accent-green);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+}
+
+.keyword-may,
+.keyword-optional {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+}
+
+.keyword-must-not,
+.keyword-shall-not {
+  color: var(--color-accent-red);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+}
+
+/* Small text */
+small,
+.text-sm {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.text-xs {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* Muted text */
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+/* Accent colors for text */
+.text-cyan {
+  color: var(--color-accent-cyan);
+}
+
+.text-green {
+  color: var(--color-accent-green);
+}
+
+.text-yellow {
+  color: var(--color-accent-yellow);
+}
+
+.text-red {
+  color: var(--color-accent-red);
+}
+
+/* Preformatted text */
+pre {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  overflow-x: auto;
+  padding: var(--space-4);
+  margin: var(--space-4) 0;
+}
+
+/* Inline code */
+code:not(pre code) {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--color-bg-tertiary);
+  padding: 0.1em 0.4em;
+  color: var(--color-accent-cyan);
+}
+
+/* Definition lists (RFC-style) */
+dl {
+  margin-bottom: var(--space-4);
+}
+
+dt {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-accent-cyan);
+  margin-top: var(--space-4);
+}
+
+dd {
+  margin-left: var(--space-6);
+  margin-top: var(--space-1);
+  color: var(--color-text-secondary);
+}
+
+/* Abbreviations */
+abbr[title] {
+  text-decoration: underline dotted;
+  cursor: help;
+}
+
+/* Superscript/subscript */
+sup, sub {
+  font-size: 0.75em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sup {
+  top: -0.5em;
+}
+
+sub {
+  bottom: -0.25em;
+}

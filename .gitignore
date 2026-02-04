@@ -6,3 +6,7 @@ __pycache__/
 .venv/
 venv/
 env/
+
+# Node.js
+node_modules/
+dist/
