@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 from dataclasses import dataclass
 import os
+from pathlib import Path
 from typing import Any
 
 import rfc8785
@@ -172,3 +173,104 @@ def verify_manifest_signature(
         public_key.verify(sig_bytes, canonicalize_manifest_for_signing(manifest))
     except InvalidSignature as exc:
         raise SignatureError("Invalid manifest signature.") from exc
+
+
+# ============ Identity Management Functions ============
+
+
+def generate_keypair() -> tuple[bytes, bytes]:
+    """
+    Generate an Ed25519 key pair.
+    
+    Returns:
+        Tuple of (private_key_pem, public_key_bytes)
+        - private_key_pem: PEM-encoded private key (bytes)
+        - public_key_bytes: Raw public key bytes (32 bytes)
+    """
+    private_key = ed25519.Ed25519PrivateKey.generate()
+    public_key = private_key.public_key()
+    
+    private_key_pem = private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption(),
+    )
+    
+    public_key_bytes = public_key.public_bytes(
+        encoding=serialization.Encoding.Raw,
+        format=serialization.PublicFormat.Raw,
+    )
+    
+    return private_key_pem, public_key_bytes
+
+
+def get_fingerprint(public_key: bytes) -> str:
+    """
+    Calculate the fingerprint of a public key.
+    
+    Args:
+        public_key: Raw public key bytes (32 bytes for Ed25519)
+    
+    Returns:
+        SHA256 hex digest of the public key (64 characters)
+    """
+    return sha256_hex(public_key)
+
+
+def load_signing_key(path: Path) -> ed25519.Ed25519PrivateKey:
+    """
+    Load an Ed25519 signing key from a PEM file.
+    
+    Args:
+        path: Path to the PEM-encoded private key file
+    
+    Returns:
+        Ed25519PrivateKey object
+    
+    Raises:
+        SignatureError: If the file cannot be read or key is invalid
+    """
+    try:
+        pem_data = path.read_bytes()
+    except OSError as exc:
+        raise SignatureError(f"Cannot read signing key file: {path}") from exc
+    
+    try:
+        private_key = serialization.load_pem_private_key(pem_data, password=None)
+    except (ValueError, TypeError) as exc:
+        raise SignatureError("Invalid PEM format for signing key.") from exc
+    
+    if not isinstance(private_key, ed25519.Ed25519PrivateKey):
+        raise SignatureError("Signing key must be an Ed25519 private key.")
+    
+    return private_key
+
+
+def sign_message(message: bytes, private_key: ed25519.Ed25519PrivateKey) -> bytes:
+    """
+    Sign a message with an Ed25519 private key.
+    
+    Args:
+        message: The message bytes to sign
+        private_key: Ed25519PrivateKey object
+    
+    Returns:
+        Signature bytes (64 bytes)
+    """
+    return private_key.sign(message)
+
+
+def get_public_key_from_private(private_key: ed25519.Ed25519PrivateKey) -> bytes:
+    """
+    Extract raw public key bytes from a private key.
+    
+    Args:
+        private_key: Ed25519PrivateKey object
+    
+    Returns:
+        Raw public key bytes (32 bytes)
+    """
+    return private_key.public_key().public_bytes(
+        encoding=serialization.Encoding.Raw,
+        format=serialization.PublicFormat.Raw,
+    )

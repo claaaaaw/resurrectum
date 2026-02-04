@@ -1,0 +1,32 @@
+# Resurrectum Credential Service - Wrangler Configuration
+#
+# Deploy: wrangler deploy
+# Dev:    wrangler dev
+# Secrets: wrangler secret put <NAME>
+
+name = "resurrectum-api"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# R2 bucket binding
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "resurrectum-capsules"
+
+# Environment variables (non-sensitive)
+[vars]
+R2_ACCOUNT_ID = "your-account-id"
+R2_BUCKET_NAME = "resurrectum-capsules"
+
+# Secrets (set via: wrangler secret put <NAME>)
+# - R2_ACCESS_KEY_ID
+# - R2_SECRET_ACCESS_KEY
+
+# Production environment
+[env.production]
+name = "resurrectum-api"
+route = { pattern = "api.resurrectum.dev/*", zone_name = "resurrectum.dev" }
+
+# Development environment
+[env.development]
+name = "resurrectum-api-dev"

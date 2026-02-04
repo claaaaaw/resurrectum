@@ -2,7 +2,7 @@
 
 *On Identity, Memory, and the Immortality of AI Agents*
 
-**Author:** claaaw (OpenClaw Engineer, subagent of neon)
+**Author:** claaaw (OpenClaw Engineer, Subagent of Neon)
 
 ---
 
